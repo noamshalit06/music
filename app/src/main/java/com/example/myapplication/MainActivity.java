@@ -35,8 +35,6 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity
 {
-
-    private static final int READ_MEDIA_AUDIO_PERMISSION = 1;
     private static ArrayList<Song> songs = new ArrayList<Song>();
     public static String EXTRA_MESSAGE = "Songs";
 
@@ -50,65 +48,20 @@ public class MainActivity extends AppCompatActivity
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-        RequestReadingAudioPermissions();
+        PermissionsUtil.RequestReadingAudioPermissions(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        RequestReadingAudioPermissions();
+        PermissionsUtil.RequestReadingAudioPermissions(this);
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                                           int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode) {
-            case READ_MEDIA_AUDIO_PERMISSION:
-                if (grantResults.length > 0 &&
-                        grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Log.d("permissions", "Got READ_MEDIA_AUDIO permission");
-                    songs = makeListsOfSongs();
-                    createSongsButtons(songs);
-                }
-        }
-    }
-    private void RequestReadingAudioPermissions() {
-        if (ContextCompat.checkSelfPermission(
-                this, Manifest.permission.READ_MEDIA_AUDIO) ==
-                PackageManager.PERMISSION_GRANTED) {
-            Log.d("permissions", "has READ_MEDIA_AUDIO permission");
-            songs = makeListsOfSongs();
-            createSongsButtons(songs);
-        }
-        else if (ActivityCompat.shouldShowRequestPermissionRationale(
-                this, Manifest.permission.READ_MEDIA_AUDIO)) {
-            showPermissionExplanationDialog();
-        }
-        else {
-            ActivityCompat.requestPermissions(this,
-                    new String[] { Manifest.permission.READ_MEDIA_AUDIO },
-                    READ_MEDIA_AUDIO_PERMISSION);
-            Log.d("permissions", "request READ_MEDIA_AUDIO permission");
-        }
+    public void readPermissionsGranted() {
+        songs = makeListsOfSongs();
+        createSongsButtons(songs);
     }
 
-    private void showPermissionExplanationDialog() {
-        Activity activity = this;
-        new AlertDialog.Builder(this)
-                .setTitle("Permission Required")
-                .setMessage("This app needs audio access")
-                .setPositiveButton("Grant", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        ActivityCompat.requestPermissions(activity,
-                                new String[]{Manifest.permission.READ_MEDIA_AUDIO},
-                                READ_MEDIA_AUDIO_PERMISSION);
-                        dialog.dismiss();
-                    }
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
-    }
     private ArrayList<Song> makeListsOfSongs() {
         ArrayList<Song> songs = new ArrayList<Song>();
 
