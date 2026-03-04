@@ -95,10 +95,7 @@ public class MainActivity extends AppCompatActivity
             do {
                 long id = audioCursor.getLong(idColumn);
                 String displayName = audioCursor.getString(displayNameColumn);
-
                 songs.add(new Song(id, displayName));
-
-                Log.d("my first file", "my first file");
                 Log.d(displayName, Long.toString(id));
             } while (audioCursor.moveToNext());
         }
@@ -107,7 +104,6 @@ public class MainActivity extends AppCompatActivity
 
     private void createSongsButtons(ArrayList<Song> songs)
     {
-        Log.d("songs length", Long.toString(songs.size()));
         LinearLayout ll = (LinearLayout)findViewById(R.id.linearLayout);
         for (int i = 0; i < songs.size(); i++) {
             Song currentSong = songs.get(i);
