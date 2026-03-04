@@ -3,6 +3,8 @@ import com.example.myapplication.data_classes.Song;
 
 
 import android.Manifest;
+import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -13,6 +15,7 @@ import android.view.View;
 import android.widget.Button;
 
 import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.graphics.Insets;
@@ -47,6 +50,11 @@ public class MainActivity extends AppCompatActivity
         RequestReadingAudioPermissions();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        RequestReadingAudioPermissions();
+    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions,
@@ -70,6 +78,10 @@ public class MainActivity extends AppCompatActivity
             songs = makeListsOfSongs();
             createSongsButtons(songs);
         }
+        else if (ActivityCompat.shouldShowRequestPermissionRationale(
+                this, Manifest.permission.READ_MEDIA_AUDIO)) {
+            showPermissionExplanationDialog();
+        }
         else {
             ActivityCompat.requestPermissions(this,
                     new String[] { Manifest.permission.READ_MEDIA_AUDIO },
@@ -78,7 +90,22 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-
+    private void showPermissionExplanationDialog() {
+        Activity activity = this;
+        new AlertDialog.Builder(this)
+                .setTitle("Permission Required")
+                .setMessage("This app needs audio access")
+                .setPositiveButton("Grant", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        ActivityCompat.requestPermissions(activity,
+                                new String[]{Manifest.permission.READ_MEDIA_AUDIO},
+                                READ_MEDIA_AUDIO_PERMISSION);
+                        dialog.dismiss();
+                    }
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
     private ArrayList<Song> makeListsOfSongs() {
         ArrayList<Song> songs = new ArrayList<Song>();
 
@@ -97,19 +124,32 @@ public class MainActivity extends AppCompatActivity
             do {
                 long id = audioCursor.getLong(idColumn);
                 String displayName = audioCursor.getString(displayNameColumn);
-                long albumId = audioCursor.getLong(idColumn);
-
+                long albumId = audioCursor.getLong(albumIdColumn);
+                Log.d(displayName, Long.toString(id));
 
                 Cursor albumCursor = getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
                         new String[] {MediaStore.Audio.Albums._ID, MediaStore.Audio.Albums.ALBUM_ART},
-                        MediaStore.Audio.Albums._ID+ "=?",
-                        new String[] {String.valueOf(albumId)},
+                        MediaStore.Audio.Albums._ID+ "=" + albumId,
+                        null,
                         null);
                 if (albumCursor.moveToFirst()) {
                     int albumArtID = albumCursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM_ART);
                     String albumArtPath = albumCursor.getString(albumArtID);
-                    songs.add(new Song(id, displayName, albumArtPath));
+                    if (albumArtPath == null) {
+                        songs.add(new Song(id, displayName));
+
+                    }
+                    else {
+                        songs.add(new Song(id, displayName, albumArtPath));
+                        Log.d("albumPath", albumArtPath);
+                    }
                 }
+                else
+                {
+                    songs.add(new Song(id, displayName));
+//                    Log.d("albumPath", "error");
+                }
+
             } while (audioCursor.moveToNext());
         }
         return songs;

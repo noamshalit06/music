@@ -12,6 +12,11 @@ public class Song {
         name = new_name;
         albumArtPath = newAlbumArtPath;
     }
+
+    public Song(long new_id, String new_name) {
+        id = new_id;
+        name = new_name;
+    }
     public long getID() {
         return id;
     }
