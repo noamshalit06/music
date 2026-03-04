@@ -30,6 +30,7 @@ public class MainActivity extends AppCompatActivity
 {
 
     private static final int READ_MEDIA_AUDIO = 1;
+    private ArrayList<Song> songs = new ArrayList<Song>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,55 +44,36 @@ public class MainActivity extends AppCompatActivity
             return insets;
         });
         askForPermissions();
-        ArrayList<Song> songs = makeListsOfSongs();
-        createSongsButtons(songs);
-
     }
 
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions,
                                            int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
             case READ_MEDIA_AUDIO:
-                // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0 &&
                         grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                }  else {
-                    // shut down app
+                    Log.d("permissions", "Got READ_MEDIA_AUDIO permission");
+                    songs = makeListsOfSongs();
+                    createSongsButtons(songs);
                 }
-                return;
         }
-        // Other 'case' lines to check for other
-        // permissions this app might request.
     }
     private void askForPermissions() {
         if (ContextCompat.checkSelfPermission(
                 this, Manifest.permission.READ_MEDIA_AUDIO) ==
                 PackageManager.PERMISSION_GRANTED) {
-            // You can use the API that requires the permission.
-            /// performAction(...);
-            Log.d("permission", "has");
-
-        }
-        else if (ActivityCompat.shouldShowRequestPermissionRationale(
-                this, Manifest.permission.READ_MEDIA_AUDIO)) {
-            // In an educational UI, explain to the user why your app requires this
-            // permission for a specific feature to behave as expected, and what
-            // features are disabled if it's declined. In this UI, include a
-            // "cancel" or "no thanks" button that lets the user continue
-            // using your app without granting the permission.
-
-            ///showInContextUI(...)
-            Log.d("permission", "show");
+            Log.d("permissions", "has READ_MEDIA_AUDIO permission");
+            songs = makeListsOfSongs();
+            createSongsButtons(songs);
         }
         else {
-            // You can directly ask for the permission.
             ActivityCompat.requestPermissions(this,
                     new String[] { Manifest.permission.READ_MEDIA_AUDIO },
                     READ_MEDIA_AUDIO);
-            Log.d("permission", "request");
-
+            Log.d("permissions", "request READ_MEDIA_AUDIO permission");
         }
     }
 
@@ -125,6 +107,7 @@ public class MainActivity extends AppCompatActivity
 
     private void createSongsButtons(ArrayList<Song> songs)
     {
+        Log.d("songs length", Long.toString(songs.size()));
         LinearLayout ll = (LinearLayout)findViewById(R.id.linearLayout);
         for (int i = 0; i < songs.size(); i++) {
             Song currentSong = songs.get(i);
