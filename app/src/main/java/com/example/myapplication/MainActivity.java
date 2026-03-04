@@ -1,6 +1,6 @@
 package com.example.myapplication;
 import com.example.myapplication.data_classes.Song;
-
+import com.example.myapplication.MyMediaPlayer;
 
 import android.Manifest;
 import android.app.Activity;
@@ -28,6 +28,7 @@ import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +38,7 @@ public class MainActivity extends AppCompatActivity
 
     private static final int READ_MEDIA_AUDIO_PERMISSION = 1;
     private static ArrayList<Song> songs = new ArrayList<Song>();
+    public static String EXTRA_MESSAGE = "Songs";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -174,8 +176,12 @@ public class MainActivity extends AppCompatActivity
     private class onClickListener implements View.OnClickListener {
         public void onClick(View v) {
             Log.d("button click", Long.toString(v.getId()));
-            Intent intent = new Intent(this, MediaPlayer.class);
-            intent.putExtra("songs", songs);
+            Intent intent = new Intent(MainActivity.this, MyMediaPlayer.class);
+            ArrayList<Song> passed_songs = new ArrayList<Song>();
+            for (int i = v.getId(); i < songs.size(); i++) {
+                passed_songs.add(songs.get(i));
+            }
+            intent.putExtra(EXTRA_MESSAGE, (Serializable) passed_songs);
             startActivity(intent);
         }
     }
