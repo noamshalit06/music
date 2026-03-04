@@ -174,7 +174,7 @@ public class MainActivity extends AppCompatActivity
     private class onClickListener implements View.OnClickListener {
         public void onClick(View v) {
             Log.d("button click", Long.toString(v.getId()));
-            Intent intent = new Intent(this, MediaPlayerScreen.class);
+            Intent intent = new Intent(this, MediaPlayer.class);
             intent.putExtra("songs", songs);
             startActivity(intent);
         }
