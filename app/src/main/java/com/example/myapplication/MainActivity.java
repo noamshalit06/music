@@ -1,4 +1,6 @@
 package com.example.myapplication;
+import com.example.myapplication.data_classes.Song;
+
 
 import android.Manifest;
 import android.content.pm.PackageManager;
@@ -29,12 +31,11 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity
 {
 
-    private static final int READ_MEDIA_AUDIO = 1;
+    private static final int READ_MEDIA_AUDIO_PERMISSION = 1;
     private ArrayList<Song> songs = new ArrayList<Song>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d("onCreate", "onCreate");
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
@@ -43,7 +44,7 @@ public class MainActivity extends AppCompatActivity
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-        askForPermissions();
+        RequestReadingAudioPermissions();
     }
 
 
@@ -52,7 +53,7 @@ public class MainActivity extends AppCompatActivity
                                            int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
-            case READ_MEDIA_AUDIO:
+            case READ_MEDIA_AUDIO_PERMISSION:
                 if (grantResults.length > 0 &&
                         grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Log.d("permissions", "Got READ_MEDIA_AUDIO permission");
@@ -61,7 +62,7 @@ public class MainActivity extends AppCompatActivity
                 }
         }
     }
-    private void askForPermissions() {
+    private void RequestReadingAudioPermissions() {
         if (ContextCompat.checkSelfPermission(
                 this, Manifest.permission.READ_MEDIA_AUDIO) ==
                 PackageManager.PERMISSION_GRANTED) {
@@ -72,7 +73,7 @@ public class MainActivity extends AppCompatActivity
         else {
             ActivityCompat.requestPermissions(this,
                     new String[] { Manifest.permission.READ_MEDIA_AUDIO },
-                    READ_MEDIA_AUDIO);
+                    READ_MEDIA_AUDIO_PERMISSION);
             Log.d("permissions", "request READ_MEDIA_AUDIO permission");
         }
     }
@@ -87,16 +88,28 @@ public class MainActivity extends AppCompatActivity
                 new String[]{"%Music%"},
                 MediaStore.Audio.Media.DISPLAY_NAME + " ASC");
 
+
         if (audioCursor != null && audioCursor.moveToFirst()) {
-            Log.d("first", "success");
             int idColumn = audioCursor.getColumnIndex(MediaStore.Audio.Media._ID);
             int displayNameColumn = audioCursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME);
+            int albumIdColumn = audioCursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID);
 
             do {
                 long id = audioCursor.getLong(idColumn);
                 String displayName = audioCursor.getString(displayNameColumn);
-                songs.add(new Song(id, displayName));
-                Log.d(displayName, Long.toString(id));
+                long albumId = audioCursor.getLong(idColumn);
+
+
+                Cursor albumCursor = getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
+                        new String[] {MediaStore.Audio.Albums._ID, MediaStore.Audio.Albums.ALBUM_ART},
+                        MediaStore.Audio.Albums._ID+ "=?",
+                        new String[] {String.valueOf(albumId)},
+                        null);
+                if (albumCursor.moveToFirst()) {
+                    int albumArtID = albumCursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM_ART);
+                    String albumArtPath = albumCursor.getString(albumArtID);
+                    songs.add(new Song(id, displayName, albumArtPath));
+                }
             } while (audioCursor.moveToNext());
         }
         return songs;
