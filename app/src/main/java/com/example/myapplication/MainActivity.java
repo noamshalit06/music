@@ -1,12 +1,15 @@
 package com.example.myapplication;
 import com.example.myapplication.data_classes.Song;
-
+import com.example.myapplication.MyMediaPlayer;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.ContentUris;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -27,14 +30,25 @@ import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity
 {
-
     private static ArrayList<Song> songs = new ArrayList<Song>();
+    public static String EXTRA_MESSAGE_SONGS_LIST = "Songs";
+
+    public static String EXTRA_MESSAGE_SONG_INDEX = "song_index";
+
+
+    public Void readPermissionsGranted() {
+        songs = makeListsOfSongs();
+        createSongsButtons(songs);
+        return null;
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,25 +60,23 @@ public class MainActivity extends AppCompatActivity
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-        PermissionsUtil.RequestReadingAudioPermissions(this);
+        PermissionsUtil.RequestReadingAudioPermissions(this, this::readPermissionsGranted);
     }
 
-    public void readPermissionsGranted() {
-        songs = makeListsOfSongs();
-        createSongsButtons(songs);
-    }
     @Override
     protected void onResume() {
         super.onResume();
-        PermissionsUtil.RequestReadingAudioPermissions(this);
+        PermissionsUtil.RequestReadingAudioPermissions(this, this::readPermissionsGranted);
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions,
                                            int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        PermissionsUtil.handlePermissionsResult(this, requestCode, permissions, grantResults);
+        PermissionsUtil.handlePermissionsResult(this, requestCode, permissions, grantResults, this::readPermissionsGranted);
     }
+
+
 
     private ArrayList<Song> makeListsOfSongs() {
         ArrayList<Song> songs = new ArrayList<Song>();
@@ -85,6 +97,9 @@ public class MainActivity extends AppCompatActivity
                 long id = audioCursor.getLong(idColumn);
                 String displayName = audioCursor.getString(displayNameColumn);
                 long albumId = audioCursor.getLong(albumIdColumn);
+
+
+
                 Log.d(displayName, Long.toString(id));
 
                 Cursor albumCursor = getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
@@ -123,16 +138,21 @@ public class MainActivity extends AppCompatActivity
             Button b = new Button(this);
             b.setText(currentSong.getName());
             b.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
-            b.setId((int)(currentSong.getID()));
+            b.setId(i);
             b.setOnClickListener(new onClickListener());
             ll.addView(b);
         }
     }
 
 
-    private static class onClickListener implements View.OnClickListener {
+    private class onClickListener implements View.OnClickListener {
         public void onClick(View v) {
             Log.d("button click", Long.toString(v.getId()));
+            Intent intent = new Intent(MainActivity.this, MyMediaPlayer.class);
+            intent.putExtra(EXTRA_MESSAGE_SONGS_LIST, (Serializable) songs);
+            intent.putExtra(EXTRA_MESSAGE_SONG_INDEX, v.getId());
+
+            startActivity(intent);
         }
     }
 }

@@ -1,21 +1,24 @@
 package com.example.myapplication.data_classes;
 
-public class Song {
-    private long id;
-    private String name;
+import java.io.Serializable;
 
-    private String albumArtPath;
+public class Song implements Serializable {
+    private final long id;
+    private final String name;
+
+    private final String albumArtPath;
 
 
     public Song(long new_id, String new_name, String newAlbumArtPath) {
-        id = new_id;
-        name = new_name;
-        albumArtPath = newAlbumArtPath;
+        this.id = new_id;
+        this.name = new_name;
+        this.albumArtPath = newAlbumArtPath;
     }
 
     public Song(long new_id, String new_name) {
         id = new_id;
         name = new_name;
+        albumArtPath = "";
     }
     public long getID() {
         return id;
@@ -26,6 +29,7 @@ public class Song {
     }
 
     public String getAlbumPicture() {
-        return name;
+        return albumArtPath;
     }
+
 }
