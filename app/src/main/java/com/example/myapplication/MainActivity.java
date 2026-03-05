@@ -1,38 +1,25 @@
 package com.example.myapplication;
 import com.example.myapplication.data_classes.Song;
-import com.example.myapplication.MyMediaPlayer;
 
-import android.Manifest;
-import android.app.Activity;
-import android.content.ContentUris;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
 import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.core.content.ContextCompat;
 
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 
-import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity
@@ -148,7 +135,7 @@ public class MainActivity extends AppCompatActivity
     private class onClickListener implements View.OnClickListener {
         public void onClick(View v) {
             Log.d("button click", Long.toString(v.getId()));
-            Intent intent = new Intent(MainActivity.this, MyMediaPlayer.class);
+            Intent intent = new Intent(MainActivity.this, MediaPlayerActivity.class);
             intent.putExtra(EXTRA_MESSAGE_SONGS_LIST, (Serializable) songs);
             intent.putExtra(EXTRA_MESSAGE_SONG_INDEX, v.getId());
 

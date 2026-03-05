@@ -14,10 +14,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MyApplication">
         <service
-            android:name=".MyMediaPlayerService"
+            android:name=".MediaPlayerService"
             android:enabled="true"/>
         <activity
-            android:name=".MyMediaPlayer"
+            android:name=".MediaPlayerActivity"
             android:exported="false" />
         <activity
             android:name=".MainActivity"

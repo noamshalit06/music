@@ -13,12 +13,11 @@ import android.util.Log;
 import com.example.myapplication.data_classes.Song;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Objects;
 
 
-public class MyMediaPlayerService extends Service implements MediaPlayer.OnErrorListener, MediaPlayer.OnPreparedListener {
+public class MediaPlayerService extends Service implements MediaPlayer.OnErrorListener, MediaPlayer.OnPreparedListener {
     private static MediaPlayer mediaPlayer = null;
     private long current_song_id;
 
@@ -29,15 +28,15 @@ public class MyMediaPlayerService extends Service implements MediaPlayer.OnError
     private final IBinder binder = new LocalBinder();
 
     public class LocalBinder extends Binder {
-        MyMediaPlayerService getService() {
-            return MyMediaPlayerService.this;
+        MediaPlayerService getService() {
+            return MediaPlayerService.this;
         }
     }
 
     @Override
     public IBinder onBind(Intent intent) {
-        songs = (ArrayList<Song>) intent.getSerializableExtra(MyMediaPlayer.EXTRA_MESSAGE_SONGS_LIST);
-        int song_index = intent.getIntExtra(MyMediaPlayer.EXTRA_MESSAGE_SONG_INDEX, 0);
+        songs = (ArrayList<Song>) intent.getSerializableExtra(MediaPlayerActivity.EXTRA_MESSAGE_SONGS_LIST);
+        int song_index = intent.getIntExtra(MediaPlayerActivity.EXTRA_MESSAGE_SONG_INDEX, 0);
         current_song_id = song_index;
         if (mediaPlayer == null) {
             mediaPlayer = new MediaPlayer();
