@@ -70,6 +70,25 @@ public class MyMediaPlayer extends AppCompatActivity {
         }
     }
 
+    public void onButtonPauseClick(View v) {
+        if (mBound) {
+            int num = mService.pauseSong();
+        }
+    }
+
+    public void onButtonNextClick(View v) {
+        if (mBound) {
+            mService.nextSong();
+        }
+    }
+
+    public void onButtonPrevClick(View v) {
+        if (mBound) {
+            mService.prevSong();
+        }
+    }
+
+
     private final ServiceConnection  connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName className,

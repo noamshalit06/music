@@ -6,15 +6,32 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MyMediaPlayer">
-    <TextView
-        android:id="@+id/text_view_id"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:text="hello" />
-    <Button
-        android:id="@+id/supabutton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="I'm a button"
-        android:onClick="onButtonPlayClick"/>
+    <LinearLayout android:id="@+id/linearLayout" android:layout_width="match_parent"
+        android:orientation="vertical" android:layout_height="match_parent">
+        <Button
+            android:id="@+id/playButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Play"
+            android:onClick="onButtonPlayClick"/>
+        <Button
+            android:id="@+id/pauseButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Pause"
+            android:onClick="onButtonPauseClick"/>
+        <Button
+            android:id="@+id/nextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Next Song"
+            android:onClick="onButtonNextClick"/>
+        <Button
+            android:id="@+id/prevButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Previous Song"
+            android:onClick="onButtonPrevClick"/>
+    </LinearLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -15,12 +15,14 @@ import com.example.myapplication.data_classes.Song;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Objects;
 
 
 public class MyMediaPlayerService extends Service implements MediaPlayer.OnErrorListener, MediaPlayer.OnPreparedListener {
-    static MediaPlayer mediaPlayer = null;
+    private static MediaPlayer mediaPlayer = null;
     private long current_song_id;
 
+    private static String state = "Non-playing";
     ArrayList<Song> songs = new ArrayList<Song>();
 
     // Binder given to clients.
@@ -46,6 +48,9 @@ public class MyMediaPlayerService extends Service implements MediaPlayer.OnError
 
 
     public void playSong() {
+        if (!Objects.equals(state, "Non-playing")) {
+            return;
+        }
         Uri contentUri = ContentUris.withAppendedId(
                 android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, songs.get((int)current_song_id).getID());
         if (mediaPlayer == null) {
@@ -77,10 +82,52 @@ public class MyMediaPlayerService extends Service implements MediaPlayer.OnError
             Log.e("mediaPlayer exception setDataSource", e.toString());
             throw new RuntimeException(e);
         }
+        state = "preparing";
         mediaPlayer.prepareAsync(); // prepare async to not block main thread
     }
 
+    public int pauseSong() {
+        if (state.equals("playing")) {
+            int time = mediaPlayer.getCurrentPosition();
+            mediaPlayer.pause();
+            state = "Non-playing";
+            return time;
+        }
+        return -1;
+    }
+
+    public void nextSong() {
+        if (state.equals("playing")) {
+            mediaPlayer.pause();
+        }
+        if (current_song_id < songs.size() - 1) {
+            current_song_id += 1;
+        }
+        else {
+            current_song_id = 0;
+        }
+        state = "Non-playing";
+        playSong();
+    }
+
+    public void prevSong() {
+        if (state.equals("playing")) {
+            mediaPlayer.pause();
+        }
+        if (current_song_id > 0) {
+            current_song_id -= 1;
+            playSong();
+        }
+        else {
+            current_song_id = songs.size() - 1;
+        }
+        state = "Non-playing";
+        playSong();
+    }
+
+
     public void onPrepared(MediaPlayer player) {
+        state = "playing";
         mediaPlayer.start();
     }
     public void initMediaPlayer() {
@@ -99,5 +146,6 @@ public class MyMediaPlayerService extends Service implements MediaPlayer.OnError
         super.onDestroy();
         mediaPlayer.release();
         mediaPlayer = null;
+        state = "Non-playing";
     }
 }
