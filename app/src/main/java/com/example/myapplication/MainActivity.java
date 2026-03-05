@@ -92,15 +92,12 @@ public class MainActivity extends AppCompatActivity
             int idColumn = audioCursor.getColumnIndex(MediaStore.Audio.Media._ID);
             int displayNameColumn = audioCursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME);
             int albumIdColumn = audioCursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID);
-//            int volumeColumn = audioCursor.getColumnIndex(MediaStore.Audio.Media.VOLUME_NAME);
 
             do {
                 long id = audioCursor.getLong(idColumn);
                 String displayName = audioCursor.getString(displayNameColumn);
                 long albumId = audioCursor.getLong(albumIdColumn);
-//                String volume = audioCursor.getString(volumeColumn);
 
-//                Uri uri = MediaStore.Audio.Media.getContentUri(volume);
 
 
                 Log.d(displayName, Long.toString(id));
@@ -152,10 +149,6 @@ public class MainActivity extends AppCompatActivity
         public void onClick(View v) {
             Log.d("button click", Long.toString(v.getId()));
             Intent intent = new Intent(MainActivity.this, MyMediaPlayer.class);
-//            ArrayList<Song> passed_songs = new ArrayList<Song>();
-//            for (int i = v.getId(); i < songs.size(); i++) {
-//                passed_songs.add(songs.get(i));
-//            }
             intent.putExtra(EXTRA_MESSAGE_SONGS_LIST, (Serializable) songs);
             intent.putExtra(EXTRA_MESSAGE_SONG_INDEX, v.getId());
 
