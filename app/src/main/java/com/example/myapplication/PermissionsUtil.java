@@ -10,23 +10,29 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import java.util.concurrent.Callable;
+
 public class PermissionsUtil {
     private static final int READ_MEDIA_AUDIO_PERMISSION = 1;
 
-    public static void handlePermissionsResult(MainActivity activity, int requestCode, String[] permissions,
-                                           int[] grantResults) {
+    public static void handlePermissionsResult(Activity activity, int requestCode, String[] permissions,
+                                           int[] grantResults, Callable<Void> runOnPermissionGranted) {
         switch (requestCode) {
             case READ_MEDIA_AUDIO_PERMISSION:
                 if (grantResults.length > 0 &&
                         grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Log.d("permissions", "Got READ_MEDIA_AUDIO permission");
-                    activity.readPermissionsGranted();
+                    try {
+                        runOnPermissionGranted.call();
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
                 }
         }
     }
 
 
-    private static void showPermissionExplanationDialog(MainActivity activity) {
+    private static void showPermissionExplanationDialog(Activity activity) {
         new AlertDialog.Builder(activity)
                 .setTitle("Permission Required")
                 .setMessage("This app needs audio access")
@@ -41,12 +47,16 @@ public class PermissionsUtil {
                 .setNegativeButton("Cancel", null)
                 .show();
     }
-    public static void RequestReadingAudioPermissions(MainActivity activity) {
+    public static void RequestReadingAudioPermissions(Activity activity, Callable<Void> runOnPermissionGranted) {
         if (ContextCompat.checkSelfPermission(
                 activity, Manifest.permission.READ_MEDIA_AUDIO) ==
                 PackageManager.PERMISSION_GRANTED) {
             Log.d("permissions", "has READ_MEDIA_AUDIO permission");
-            activity.readPermissionsGranted();
+            try {
+                runOnPermissionGranted.call();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
 
 
         }

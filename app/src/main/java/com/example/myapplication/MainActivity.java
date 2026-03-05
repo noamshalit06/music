@@ -4,10 +4,12 @@ import com.example.myapplication.MyMediaPlayer;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.ContentUris;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -36,7 +38,17 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity
 {
     private static ArrayList<Song> songs = new ArrayList<Song>();
-    public static String EXTRA_MESSAGE = "Songs";
+    public static String EXTRA_MESSAGE_SONGS_LIST = "Songs";
+
+    public static String EXTRA_MESSAGE_SONG_INDEX = "song_index";
+
+
+    public Void readPermissionsGranted() {
+        songs = makeListsOfSongs();
+        createSongsButtons(songs);
+        return null;
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,19 +60,23 @@ public class MainActivity extends AppCompatActivity
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-        PermissionsUtil.RequestReadingAudioPermissions(this);
+        PermissionsUtil.RequestReadingAudioPermissions(this, this::readPermissionsGranted);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        PermissionsUtil.RequestReadingAudioPermissions(this);
+        PermissionsUtil.RequestReadingAudioPermissions(this, this::readPermissionsGranted);
     }
 
-    public void readPermissionsGranted() {
-        songs = makeListsOfSongs();
-        createSongsButtons(songs);
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                                           int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        PermissionsUtil.handlePermissionsResult(this, requestCode, permissions, grantResults, this::readPermissionsGranted);
     }
+
+
 
     private ArrayList<Song> makeListsOfSongs() {
         ArrayList<Song> songs = new ArrayList<Song>();
@@ -76,11 +92,17 @@ public class MainActivity extends AppCompatActivity
             int idColumn = audioCursor.getColumnIndex(MediaStore.Audio.Media._ID);
             int displayNameColumn = audioCursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME);
             int albumIdColumn = audioCursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID);
+//            int volumeColumn = audioCursor.getColumnIndex(MediaStore.Audio.Media.VOLUME_NAME);
 
             do {
                 long id = audioCursor.getLong(idColumn);
                 String displayName = audioCursor.getString(displayNameColumn);
                 long albumId = audioCursor.getLong(albumIdColumn);
+//                String volume = audioCursor.getString(volumeColumn);
+
+//                Uri uri = MediaStore.Audio.Media.getContentUri(volume);
+
+
                 Log.d(displayName, Long.toString(id));
 
                 Cursor albumCursor = getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
@@ -130,11 +152,13 @@ public class MainActivity extends AppCompatActivity
         public void onClick(View v) {
             Log.d("button click", Long.toString(v.getId()));
             Intent intent = new Intent(MainActivity.this, MyMediaPlayer.class);
-            ArrayList<Song> passed_songs = new ArrayList<Song>();
-            for (int i = v.getId(); i < songs.size(); i++) {
-                passed_songs.add(songs.get(i));
-            }
-            intent.putExtra(EXTRA_MESSAGE, (Serializable) passed_songs);
+//            ArrayList<Song> passed_songs = new ArrayList<Song>();
+//            for (int i = v.getId(); i < songs.size(); i++) {
+//                passed_songs.add(songs.get(i));
+//            }
+            intent.putExtra(EXTRA_MESSAGE_SONGS_LIST, (Serializable) songs);
+            intent.putExtra(EXTRA_MESSAGE_SONG_INDEX, v.getId());
+
             startActivity(intent);
         }
     }
