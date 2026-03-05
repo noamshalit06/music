@@ -36,7 +36,6 @@ public class MyMediaPlayerService extends Service implements MediaPlayer.OnError
     public IBinder onBind(Intent intent) {
         songs = (ArrayList<Song>) intent.getSerializableExtra(MyMediaPlayer.EXTRA_MESSAGE_SONGS_LIST);
         int song_index = intent.getIntExtra(MyMediaPlayer.EXTRA_MESSAGE_SONG_INDEX, 0);
-//        current_song_id = songs.get(song_index).getID();
         current_song_id = song_index;
         if (mediaPlayer == null) {
             mediaPlayer = new MediaPlayer();
@@ -65,6 +64,9 @@ public class MyMediaPlayerService extends Service implements MediaPlayer.OnError
                     current_song_id += 1;
                     playSong();
                 }
+                else {
+                    current_song_id = 0;
+                }
                 Log.d("mediaPlayer", "completed");
             }
         });
@@ -88,9 +90,7 @@ public class MyMediaPlayerService extends Service implements MediaPlayer.OnError
 
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
-        // ... react appropriately ...
-        // The MediaPlayer has moved to the Error state, must be reset!
-        Log.e("error", "nonono");
+        Log.e("error", Integer.toString(what) + Integer.toString(extra));
         return true;
     }
 
