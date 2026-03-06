@@ -141,10 +141,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         state = "playing";
         mediaPlayer.start();
     }
-    public void initMediaPlayer() {
-        // ...initialize the MediaPlayer here...
-        mediaPlayer.setOnErrorListener(this);
-    }
 
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
