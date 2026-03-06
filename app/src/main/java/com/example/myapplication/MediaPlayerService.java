@@ -21,6 +21,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     private static MediaPlayer mediaPlayer = null;
     private long current_song_index;
 
+    private long song_time;
+
     private static String state = "Non-playing";
     ArrayList<Song> songs = new ArrayList<Song>();
 
@@ -36,7 +38,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     @Override
     public IBinder onBind(Intent intent) {
         songs = (ArrayList<Song>) intent.getSerializableExtra(MediaPlayerActivity.EXTRA_MESSAGE_SONGS_LIST);
-        int song_index = intent.getIntExtra(MediaPlayerActivity.EXTRA_MESSAGE_SONG_INDEX, 0);
+        long song_index = intent.getLongExtra(MediaPlayerActivity.EXTRA_MESSAGE_SONG_INDEX, 0);
+        song_time = intent.getLongExtra(MediaPlayerActivity.EXTRA_MESSAGE_SONG_TIME, 0);
         current_song_index = song_index;
         if (mediaPlayer == null) {
             mediaPlayer = new MediaPlayer();
@@ -98,6 +101,28 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     public Song getSong() {
         return songs.get((int)current_song_index);
     }
+
+
+    public long getTimeInPlayingSong() {
+        if (state.equals("playing")) {
+            return mediaPlayer.getCurrentPosition();
+        }
+        return -1;
+    }
+
+    public long getTimeInPausedOrPlayingSong() {
+        if (mediaPlayer.getCurrentPosition() == 0 && song_time > 0) {
+            return song_time;
+        }
+        song_time = 0;
+        return mediaPlayer.getCurrentPosition();
+    }
+    public long getSongIndex() {
+        if (state.equals("playing")) {
+            return current_song_index;
+        }
+        return -1;
+    }
     public int pauseSong() {
         if (state.equals("playing")) {
             int time = mediaPlayer.getCurrentPosition();
@@ -138,6 +163,10 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
 
 
     public void onPrepared(MediaPlayer player) {
+        if (song_time != 0) {
+            mediaPlayer.seekTo((int)song_time);
+            song_time = 0;
+        }
         state = "playing";
         mediaPlayer.start();
     }
@@ -147,6 +176,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         Log.e("error", Integer.toString(what) + Integer.toString(extra));
         return true;
     }
+
 
     @Override
     public void onDestroy() {

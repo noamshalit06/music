@@ -1,9 +1,12 @@
 package com.example.myapplication;
 import com.example.myapplication.data_classes.Song;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
@@ -29,6 +32,37 @@ public class MainActivity extends AppCompatActivity
 
     public static String EXTRA_MESSAGE_SONG_INDEX = "song_index";
 
+    public static String EXTRA_MESSAGE_SONG_TIME = "song_time";
+
+    public static String state;
+
+
+    public Void readPermissionsGrantedOnCreate() {
+        songs = makeListsOfSongs();
+        createSongsButtons(songs);
+
+        SharedPreferences sharedPref = this.getSharedPreferences("media_player_prefs", MODE_PRIVATE);
+
+        long song_index_insert_timestamp_default_value = getResources().getInteger(R.integer.song_index_insert_timestamp_default_value);
+        long song_index_insert_timestamp = sharedPref.getLong(getString(R.string.song_index_insert_timestamp), song_index_insert_timestamp_default_value);
+
+
+        long song_index_number_default_value = getResources().getInteger(R.integer.song_index_number_default_value);
+        long song_index_number = sharedPref.getLong(getString(R.string.song_index_number), song_index_number_default_value);
+
+        long time_in_song_default_value = getResources().getInteger(R.integer.time_in_song_default_value);
+        long time_in_song = sharedPref.getLong(getString(R.string.time_in_song), time_in_song_default_value);
+
+        if (song_index_insert_timestamp != 0 && time_in_song > 0 && song_index_number >= 0 && song_index_insert_timestamp + 500 < System.currentTimeMillis() ) {
+            Intent intent = new Intent(MainActivity.this, MediaPlayerActivity.class);
+            intent.putExtra(EXTRA_MESSAGE_SONGS_LIST, (Serializable) songs);
+            intent.putExtra(EXTRA_MESSAGE_SONG_INDEX, song_index_number);
+            intent.putExtra(EXTRA_MESSAGE_SONG_TIME, time_in_song);
+
+            startActivity(intent);
+        }
+        return null;
+    }
 
     public Void readPermissionsGranted() {
         songs = makeListsOfSongs();
@@ -39,6 +73,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        state = "create";
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
@@ -47,11 +82,12 @@ public class MainActivity extends AppCompatActivity
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-        PermissionsUtil.RequestReadingAudioPermissions(this, this::readPermissionsGranted);
+        PermissionsUtil.RequestReadingAudioPermissions(this, this::readPermissionsGrantedOnCreate);
     }
 
     @Override
     protected void onResume() {
+        state = "resume";
         super.onResume();
         PermissionsUtil.RequestReadingAudioPermissions(this, this::readPermissionsGranted);
     }
@@ -60,7 +96,12 @@ public class MainActivity extends AppCompatActivity
     public void onRequestPermissionsResult(int requestCode, String[] permissions,
                                            int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        PermissionsUtil.handlePermissionsResult(this, requestCode, permissions, grantResults, this::readPermissionsGranted);
+        if (state.equals("create")) {
+            PermissionsUtil.handlePermissionsResult(this, requestCode, permissions, grantResults, this::readPermissionsGrantedOnCreate);
+        }
+        else if (state.equals("resume")) {
+            PermissionsUtil.handlePermissionsResult(this, requestCode, permissions, grantResults, this::readPermissionsGranted);
+        }
     }
 
 
@@ -139,7 +180,7 @@ public class MainActivity extends AppCompatActivity
             Log.d("button click", Long.toString(v.getId()));
             Intent intent = new Intent(MainActivity.this, MediaPlayerActivity.class);
             intent.putExtra(EXTRA_MESSAGE_SONGS_LIST, (Serializable) songs);
-            intent.putExtra(EXTRA_MESSAGE_SONG_INDEX, v.getId());
+            intent.putExtra(EXTRA_MESSAGE_SONG_INDEX, (long)v.getId());
 
             startActivity(intent);
         }

@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.VibrationEffect;
@@ -18,6 +19,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.myapplication.data_classes.Song;
+import com.google.gson.Gson;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -27,6 +29,9 @@ public class MediaPlayerActivity extends AppCompatActivity {
     static final String  EXTRA_MESSAGE_SONGS_LIST = "media_player_songs_list";
 
     static final String  EXTRA_MESSAGE_SONG_INDEX = "media_player_songs_index";
+
+    static final String  EXTRA_MESSAGE_SONG_TIME = "media_player_song_time";
+
 
     MediaPlayerService mService;
     boolean mBound = false;
@@ -51,12 +56,37 @@ public class MediaPlayerActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         ArrayList<Song> songs = (ArrayList<Song>) intent.getSerializableExtra(MainActivity.EXTRA_MESSAGE_SONGS_LIST);
-        int song_index = intent.getIntExtra(MainActivity.EXTRA_MESSAGE_SONG_INDEX, 0);
+        long song_index = intent.getLongExtra(MainActivity.EXTRA_MESSAGE_SONG_INDEX, 0);
+        long song_time = intent.getLongExtra(MainActivity.EXTRA_MESSAGE_SONG_TIME, 0);
 
         Intent send_intent = new Intent(this, MediaPlayerService.class);
         send_intent.putExtra(EXTRA_MESSAGE_SONGS_LIST, (Serializable) songs);
         send_intent.putExtra(EXTRA_MESSAGE_SONG_INDEX, song_index);
+        send_intent.putExtra(EXTRA_MESSAGE_SONG_TIME, song_time);
+
         bindService(send_intent, connection, Context.BIND_AUTO_CREATE);
+
+        MediaPlayerActivity activity = this;
+        Thread thread = new Thread() {
+            @Override
+            public void run() {
+                while (true) {
+                    try {
+                        sleep(100);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                    SharedPreferences sharedPref = activity.getSharedPreferences("media_player_prefs", MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPref.edit();
+                    editor.putLong(getString(R.string.song_index_insert_timestamp), System.currentTimeMillis());
+                    editor.putLong(getString(R.string.song_index_number), mService.getSongIndex());
+                    editor.putLong(getString(R.string.time_in_song), mService.getTimeInPlayingSong());
+                    editor.apply();
+                    updateProgressBar(false);
+                }
+            }
+        };
+        thread.start();
     }
 
 
@@ -79,11 +109,21 @@ public class MediaPlayerActivity extends AppCompatActivity {
 
     public void onButtonPauseClick(View v) {
         if (mBound) {
-            int time = mService.pauseSong();
-            int songDuration = (int)mService.getSong().getDuration();
-            ProgressBar songProgressBar = (ProgressBar) findViewById(R.id.songProgressBar);
-            songProgressBar.setProgress((time * 1000) / songDuration);
+            updateProgressBar(true);
         }
+    }
+
+    public void updateProgressBar(boolean stop) {
+        long time = 0;
+        if (stop) {
+            time = mService.pauseSong();
+        }
+        else {
+            time = mService.getTimeInPausedOrPlayingSong();
+        }
+        long songDuration = mService.getSong().getDuration();
+        ProgressBar songProgressBar = (ProgressBar) findViewById(R.id.songProgressBar);
+        songProgressBar.setProgress((int)((time * 1000) / songDuration));
     }
 
     public void onButtonNextClick(View v) {
