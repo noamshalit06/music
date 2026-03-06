@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 
@@ -31,7 +32,6 @@ public class MediaPlayerActivity extends AppCompatActivity {
     static final String  EXTRA_MESSAGE_SONG_INDEX = "media_player_songs_index";
 
     static final String  EXTRA_MESSAGE_SONG_TIME = "media_player_song_time";
-
 
     MediaPlayerService mService;
     boolean mBound = false;
@@ -76,13 +76,18 @@ public class MediaPlayerActivity extends AppCompatActivity {
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }
-                    SharedPreferences sharedPref = activity.getSharedPreferences("media_player_prefs", MODE_PRIVATE);
-                    SharedPreferences.Editor editor = sharedPref.edit();
-                    editor.putLong(getString(R.string.song_index_insert_timestamp), System.currentTimeMillis());
-                    editor.putLong(getString(R.string.song_index_number), mService.getSongIndex());
-                    editor.putLong(getString(R.string.time_in_song), mService.getTimeInPlayingSong());
-                    editor.apply();
-                    updateProgressBar(false);
+                    try {
+                        SharedPreferences sharedPref = activity.getSharedPreferences("media_player_prefs", MODE_PRIVATE);
+                        SharedPreferences.Editor editor = sharedPref.edit();
+                        editor.putLong(getString(R.string.song_index_insert_timestamp), System.currentTimeMillis());
+                        editor.putLong(getString(R.string.song_index_number), mService.getSongIndex());
+                        editor.putLong(getString(R.string.time_in_song), mService.getTimeInPlayingSong());
+                        editor.apply();
+                        updateProgressBar(false);
+                    }
+                    catch (NullPointerException | IllegalStateException e) {
+                        break;
+                    }
                 }
             }
         };
