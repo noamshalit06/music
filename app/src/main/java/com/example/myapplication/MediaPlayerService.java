@@ -78,6 +78,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
                         current_song_index = 0;
                     }
                     Log.d("mediaPlayer", "completed");
+                    state = "Non-playing";
                 }
             });
             mediaPlayer.reset();
