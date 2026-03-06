@@ -19,7 +19,7 @@ import java.util.Objects;
 
 public class MediaPlayerService extends Service implements MediaPlayer.OnErrorListener, MediaPlayer.OnPreparedListener {
     private static MediaPlayer mediaPlayer = null;
-    private long current_song_id;
+    private long current_song_index;
 
     private static String state = "Non-playing";
     ArrayList<Song> songs = new ArrayList<Song>();
@@ -37,7 +37,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     public IBinder onBind(Intent intent) {
         songs = (ArrayList<Song>) intent.getSerializableExtra(MediaPlayerActivity.EXTRA_MESSAGE_SONGS_LIST);
         int song_index = intent.getIntExtra(MediaPlayerActivity.EXTRA_MESSAGE_SONG_INDEX, 0);
-        current_song_id = song_index;
+        current_song_index = song_index;
         if (mediaPlayer == null) {
             mediaPlayer = new MediaPlayer();
             mediaPlayer.setOnPreparedListener(this);
@@ -47,63 +47,75 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
 
 
     public void playSong() {
-        if (!Objects.equals(state, "Non-playing")) {
+        if (Objects.equals(state, "playing")) {
             return;
         }
-        Uri contentUri = ContentUris.withAppendedId(
-                android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, songs.get((int)current_song_id).getID());
-        if (mediaPlayer == null) {
-            mediaPlayer = new MediaPlayer();
+        else if (Objects.equals(state, "paused")) {
+            state = "playing";
+            mediaPlayer.start();
         }
-        mediaPlayer.setAudioAttributes(
-                new AudioAttributes.Builder()
-                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                        .setUsage(AudioAttributes.USAGE_MEDIA)
-                        .build()
-        );
-        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mp) {
-                if (current_song_id < songs.size() - 1) {
-                    current_song_id += 1;
-                    playSong();
-                }
-                else {
-                    current_song_id = 0;
-                }
-                Log.d("mediaPlayer", "completed");
+        else
+        {
+            Uri contentUri = ContentUris.withAppendedId(
+                    android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, songs.get((int)current_song_index).getID());
+            if (mediaPlayer == null) {
+                mediaPlayer = new MediaPlayer();
             }
-        });
-        mediaPlayer.reset();
-        try {
-            mediaPlayer.setDataSource(getApplicationContext(), contentUri);
-        } catch (IOException | IllegalStateException e) {
-            Log.e("mediaPlayer exception setDataSource", e.toString());
-            throw new RuntimeException(e);
+            mediaPlayer.setAudioAttributes(
+                    new AudioAttributes.Builder()
+                            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                            .setUsage(AudioAttributes.USAGE_MEDIA)
+                            .build()
+            );
+            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mp) {
+                    if (current_song_index < songs.size() - 1) {
+                        current_song_index += 1;
+                        playSong();
+                    }
+                    else {
+                        current_song_index = 0;
+                    }
+                    Log.d("mediaPlayer", "completed");
+                }
+            });
+            mediaPlayer.reset();
+            try {
+                mediaPlayer.setDataSource(getApplicationContext(), contentUri);
+            } catch (IOException | IllegalStateException e) {
+                Log.e("mediaPlayer exception setDataSource", e.toString());
+                throw new RuntimeException(e);
+            }
+            state = "preparing";
+            mediaPlayer.prepareAsync(); // prepare async to not block main thread
         }
-        state = "preparing";
-        mediaPlayer.prepareAsync(); // prepare async to not block main thread
+
     }
 
+
+    public Song getSong() {
+        return songs.get((int)current_song_index);
+    }
     public int pauseSong() {
         if (state.equals("playing")) {
             int time = mediaPlayer.getCurrentPosition();
             mediaPlayer.pause();
-            state = "Non-playing";
+            state = "paused";
             return time;
         }
-        return -1;
+        return 0;
     }
 
     public void nextSong() {
         if (state.equals("playing")) {
             mediaPlayer.pause();
         }
-        if (current_song_id < songs.size() - 1) {
-            current_song_id += 1;
+        if (current_song_index < songs.size() - 1) {
+            current_song_index += 1;
         }
         else {
-            current_song_id = 0;
+            current_song_index = 0;
         }
         state = "Non-playing";
         playSong();
@@ -113,12 +125,12 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         if (state.equals("playing")) {
             mediaPlayer.pause();
         }
-        if (current_song_id > 0) {
-            current_song_id -= 1;
+        if (current_song_index > 0) {
+            current_song_index -= 1;
             playSong();
         }
         else {
-            current_song_id = songs.size() - 1;
+            current_song_index = songs.size() - 1;
         }
         state = "Non-playing";
         playSong();

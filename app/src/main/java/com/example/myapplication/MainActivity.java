@@ -79,15 +79,18 @@ public class MainActivity extends AppCompatActivity
             int idColumn = audioCursor.getColumnIndex(MediaStore.Audio.Media._ID);
             int displayNameColumn = audioCursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME);
             int albumIdColumn = audioCursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID);
+            int durationColumn = audioCursor.getColumnIndex(MediaStore.Audio.Media.DURATION);
+
 
             do {
                 long id = audioCursor.getLong(idColumn);
                 String displayName = audioCursor.getString(displayNameColumn);
                 long albumId = audioCursor.getLong(albumIdColumn);
+                long duration = audioCursor.getLong(durationColumn);
 
 
 
-                Log.d(displayName, Long.toString(id));
+                Log.d(displayName, Long.toString(duration));
 
                 Cursor albumCursor = getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
                         new String[] {MediaStore.Audio.Albums._ID, MediaStore.Audio.Albums.ALBUM_ART},
@@ -98,18 +101,17 @@ public class MainActivity extends AppCompatActivity
                     int albumArtID = albumCursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM_ART);
                     String albumArtPath = albumCursor.getString(albumArtID);
                     if (albumArtPath == null) {
-                        songs.add(new Song(id, displayName));
+                        songs.add(new Song(id, displayName, duration));
 
                     }
                     else {
-                        songs.add(new Song(id, displayName, albumArtPath));
+                        songs.add(new Song(id, displayName, duration, albumArtPath));
                         Log.d("albumPath", albumArtPath);
                     }
                 }
                 else
                 {
-                    songs.add(new Song(id, displayName));
-//                    Log.d("albumPath", "error");
+                    songs.add(new Song(id, displayName, duration));
                 }
 
             } while (audioCursor.moveToNext());

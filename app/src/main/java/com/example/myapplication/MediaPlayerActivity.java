@@ -6,7 +6,10 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.view.View;
+import android.widget.ProgressBar;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -56,26 +59,45 @@ public class MediaPlayerActivity extends AppCompatActivity {
         bindService(send_intent, connection, Context.BIND_AUTO_CREATE);
     }
 
+
+    private Void vibrate() {
+        final Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+
+        final VibrationEffect vibrationEffect1 = VibrationEffect.createOneShot(1000, VibrationEffect.DEFAULT_AMPLITUDE);
+
+        // it is safe to cancel other vibrations currently taking place
+        vibrator.cancel();
+        vibrator.vibrate(vibrationEffect1);
+        return null;
+    }
     public void onButtonPlayClick(View v) {
         if (mBound) {
+            PermissionsUtil.RequestVibratePermissions(this, this::vibrate);
             mService.playSong();
         }
     }
 
     public void onButtonPauseClick(View v) {
         if (mBound) {
-            int num = mService.pauseSong();
+            int time = mService.pauseSong();
+            int songDuration = (int)mService.getSong().getDuration();
+            ProgressBar songProgressBar = (ProgressBar) findViewById(R.id.songProgressBar);
+            songProgressBar.setProgress((time * 1000) / songDuration);
         }
     }
 
     public void onButtonNextClick(View v) {
         if (mBound) {
             mService.nextSong();
+            ProgressBar songProgressBar = (ProgressBar) findViewById(R.id.songProgressBar);
+            songProgressBar.setProgress(0);
         }
     }
 
     public void onButtonPrevClick(View v) {
         if (mBound) {
+            ProgressBar songProgressBar = (ProgressBar) findViewById(R.id.songProgressBar);
+            songProgressBar.setProgress(0);
             mService.prevSong();
         }
     }
