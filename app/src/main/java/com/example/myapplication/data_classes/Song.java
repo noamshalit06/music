@@ -6,18 +6,21 @@ public class Song implements Serializable {
     private final long id;
     private final String name;
 
+    private final long duration;
     private final String albumArtPath;
 
 
-    public Song(long new_id, String new_name, String newAlbumArtPath) {
+    public Song(long new_id, String new_name, long duration, String newAlbumArtPath) {
         this.id = new_id;
         this.name = new_name;
+        this.duration = duration;
         this.albumArtPath = newAlbumArtPath;
     }
 
-    public Song(long new_id, String new_name) {
-        id = new_id;
-        name = new_name;
+    public Song(long newId, String newName, long newDuration) {
+        id = newId;
+        name = newName;
+        duration = newDuration;
         albumArtPath = "";
     }
     public long getID() {
@@ -27,6 +30,11 @@ public class Song implements Serializable {
     public String getName() {
         return name;
     }
+
+    public long getDuration() {
+        return duration;
+    }
+
 
     public String getAlbumPicture() {
         return albumArtPath;
