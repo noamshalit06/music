@@ -156,19 +156,7 @@ public class MainActivity extends AppCompatActivity
                 String displayName = audioCursor.getString(displayNameColumn);
                 long albumId = audioCursor.getLong(albumIdColumn);
                 long duration = audioCursor.getLong(durationColumn);
-
-
-//                Log.d(displayName, Long.toString(duration));
-//
-//                Cursor albumCursor = getContentResolver().query(MediaStore.Audio.A,
-//                        new String[] {MediaStore.Audio.Albums._ID, MediaStore.Audio.Albums.ALBUM_ART},
-//                        MediaStore.Audio.Albums._ID+ "=" + albumId,
-//                        null,
-//                        null);
-//                if (albumCursor.moveToFirst()) {
-//                    int albumArtID = albumCursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM_ART);
-//                    String albumArtPath = albumCursor.getString(albumArtID);
-
+                
                 songs.add(new Song(id, displayName, duration, albumId));
 
 
