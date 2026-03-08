@@ -10,6 +10,8 @@ android {
             minorApiLevel = 1
         }
     }
+    ndkVersion = "29.0.14206865"
+
 
     defaultConfig {
         applicationId = "com.example.myapplication"
@@ -19,6 +21,15 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        ndk{
+            abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64") //generate binary for the following CPU
+        }
+        externalNativeBuild {
+            cmake {
+                version = "3.29.1"
+                cppFlags += "-std=c++11 -fsigned-char"
+            }
+        }
     }
 
     buildTypes {
@@ -36,6 +47,27 @@ android {
     }
     buildFeatures {
         compose = true
+    }
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+        }
+    }
+
+
+
+    sourceSets {
+        getByName("main") {
+            jniLibs {
+                directories.add("libs")
+            }
+        }
+    }
+
+    packaging {
+        jniLibs {
+            pickFirsts += listOf("lib/armeabi-v7a/libcrypto-utils.so", "lib/arm64-v8a/libcrypto-utils.so")
+        }
     }
 }
 

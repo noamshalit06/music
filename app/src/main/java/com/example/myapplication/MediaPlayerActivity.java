@@ -175,6 +175,12 @@ public class MediaPlayerActivity extends AppCompatActivity {
         }
     }
 
+    public void onButtonLikeClick(View v) {
+        if (mBound) {
+            updateProgressBar(true);
+        }
+    }
+
 
     private final ServiceConnection  connection = new ServiceConnection() {
         @Override
