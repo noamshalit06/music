@@ -1,11 +1,16 @@
 package com.example.myapplication;
 import com.example.myapplication.data_classes.Song;
 
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.ParcelFileDescriptor;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -21,6 +26,7 @@ import androidx.core.view.WindowInsetsCompat;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 
+import java.io.FileDescriptor;
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -105,7 +111,29 @@ public class MainActivity extends AppCompatActivity
     }
 
 
+    private Bitmap getAlbumart(Long album_id)
+    {
+        Bitmap bm = null;
+        try
+        {
+            final Uri sArtworkUri = Uri
+                    .parse("content://media/external/audio/albumart");
 
+            Uri uri = ContentUris.withAppendedId(sArtworkUri, album_id);
+
+            ParcelFileDescriptor pfd = this.getContentResolver()
+                    .openFileDescriptor(uri, "r");
+
+            if (pfd != null)
+            {
+                FileDescriptor fd = pfd.getFileDescriptor();
+                bm = BitmapFactory.decodeFileDescriptor(fd);
+            }
+        } catch (Exception e) {
+        }
+        Log.d("bm", bm.toString());
+        return bm;
+    }
     private ArrayList<Song> makeListsOfSongs() {
         ArrayList<Song> songs = new ArrayList<Song>();
 
@@ -130,30 +158,19 @@ public class MainActivity extends AppCompatActivity
                 long duration = audioCursor.getLong(durationColumn);
 
 
+//                Log.d(displayName, Long.toString(duration));
+//
+//                Cursor albumCursor = getContentResolver().query(MediaStore.Audio.A,
+//                        new String[] {MediaStore.Audio.Albums._ID, MediaStore.Audio.Albums.ALBUM_ART},
+//                        MediaStore.Audio.Albums._ID+ "=" + albumId,
+//                        null,
+//                        null);
+//                if (albumCursor.moveToFirst()) {
+//                    int albumArtID = albumCursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM_ART);
+//                    String albumArtPath = albumCursor.getString(albumArtID);
 
-                Log.d(displayName, Long.toString(duration));
+                songs.add(new Song(id, displayName, duration, albumId));
 
-                Cursor albumCursor = getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
-                        new String[] {MediaStore.Audio.Albums._ID, MediaStore.Audio.Albums.ALBUM_ART},
-                        MediaStore.Audio.Albums._ID+ "=" + albumId,
-                        null,
-                        null);
-                if (albumCursor.moveToFirst()) {
-                    int albumArtID = albumCursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM_ART);
-                    String albumArtPath = albumCursor.getString(albumArtID);
-                    if (albumArtPath == null) {
-                        songs.add(new Song(id, displayName, duration));
-
-                    }
-                    else {
-                        songs.add(new Song(id, displayName, duration, albumArtPath));
-                        Log.d("albumPath", albumArtPath);
-                    }
-                }
-                else
-                {
-                    songs.add(new Song(id, displayName, duration));
-                }
 
             } while (audioCursor.moveToNext());
         }

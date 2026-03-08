@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.ImageView;
 
 import com.example.myapplication.data_classes.Song;
 
@@ -47,6 +48,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         }
         return binder;
     }
+
 
 
     public void playSong() {

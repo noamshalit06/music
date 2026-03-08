@@ -5,12 +5,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 
 import androidx.activity.EdgeToEdge;
@@ -49,6 +51,13 @@ public class MediaPlayerActivity extends AppCompatActivity {
         }
 
 
+    private void showArt() {
+        ImageView myImageView = (ImageView)findViewById(R.id.albumArt);
+        Bitmap bm = mService.getSong().getAlbumPicture(this);
+        if (bm != null) {
+            myImageView.setImageBitmap(bm);
+        }
+    }
 
     @Override
     protected void onStart() {
@@ -84,6 +93,18 @@ public class MediaPlayerActivity extends AppCompatActivity {
                         editor.putLong(getString(R.string.time_in_song), mService.getTimeInPlayingSong());
                         editor.apply();
                         updateProgressBar(false);
+
+
+                        ImageView myImageView = (ImageView)findViewById(R.id.albumArt);
+                        Bitmap bm = mService.getSong().getAlbumPicture(activity);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (bm != null) {
+                                    myImageView.setImageBitmap(bm);
+                                }
+                            }
+                        });
                     }
                     catch (NullPointerException | IllegalStateException e) {
                         break;
