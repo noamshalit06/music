@@ -6,6 +6,7 @@
 #include <string>
 #include "CryptoUtils.h"
 extern "C"
+
 JNIEXPORT jstring JNICALL Java_com_example_myapplication_JniCallNative_Encrypt
         (JNIEnv *env, jclass, jstring plaintext)
 {

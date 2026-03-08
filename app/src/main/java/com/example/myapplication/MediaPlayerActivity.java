@@ -177,7 +177,8 @@ public class MediaPlayerActivity extends AppCompatActivity {
 
     public void onButtonLikeClick(View v) {
         if (mBound) {
-            updateProgressBar(true);
+            Log.d("encryption", JniCallNative.Encrypt("abc"));
+            Log.d("decryption", JniCallNative.Decrypt(JniCallNative.Encrypt("abc")));
         }
     }
 

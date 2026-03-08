@@ -1,6 +1,9 @@
 package com.example.myapplication;
 
 public class JniCallNative {
-    public native String Decrypt(String plaintext);
-    public native String Encrypt(String plaintext);
+    static {
+        System.loadLibrary("blackbox"); // Must match your CMake add_library name
+    }
+    public static native String Decrypt(String plaintext);
+    public static native String Encrypt(String plaintext);
 }
