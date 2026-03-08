@@ -46,6 +46,7 @@ public class MainActivity extends AppCompatActivity
 
 
     public Void readPermissionsGrantedOnCreate() {
+        removeButtons();
         songs = makeListsOfSongs();
         createSongsButtons(songs);
 
@@ -66,6 +67,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     public Void readPermissionsGranted() {
+        removeButtons();
         songs = makeListsOfSongs();
         createSongsButtons(songs);
         return null;
@@ -142,11 +144,29 @@ public class MainActivity extends AppCompatActivity
         for (int i = 0; i < songs.size(); i++) {
             Song currentSong = songs.get(i);
             Button b = new Button(this);
-            b.setText(currentSong.getName());
+            String text = currentSong.getName();
+            if (currentSong.IsLiked()) {
+                text += " $$$";
+            }
+            b.setText(text);
             b.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
             b.setId(i);
             b.setOnClickListener(new onClickListener());
             ll.addView(b);
+        }
+    }
+
+    private void removeButtons() {
+        int i = 0;
+        LinearLayout ll = (LinearLayout)findViewById(R.id.linearLayout);
+
+        while (true) {
+            Button b = (Button)findViewById(i);
+            if (b == null) {
+                break;
+            }
+            ll.removeView(b);
+            i += 1;
         }
     }
 
