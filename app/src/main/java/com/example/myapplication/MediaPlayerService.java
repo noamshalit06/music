@@ -57,6 +57,33 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     }
 
 
+    private void setMediaPlayer() {
+        if (mediaPlayer == null) {
+            mediaPlayer = new MediaPlayer();
+        }
+        mediaPlayer.setAudioAttributes(
+                new AudioAttributes.Builder()
+                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                        .setUsage(AudioAttributes.USAGE_MEDIA)
+                        .build()
+        );
+        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                Log.d("mediaPlayer", "song" + Long.toString(current_song_index) + " completed");
+
+                state = State.NON_PLAYING;
+                if (current_song_index < songs.size() - 1) {
+                    current_song_index += 1;
+                }
+                else {
+                    current_song_index = 0;
+                }
+                playSong();
+            }
+        });
+        mediaPlayer.reset();
+    }
 
     public void playSong() {
         if (state == State.PLAYING) {
@@ -70,30 +97,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         {
             Uri contentUri = ContentUris.withAppendedId(
                     android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, songs.get((int)current_song_index).getID());
-            if (mediaPlayer == null) {
-                mediaPlayer = new MediaPlayer();
-            }
-            mediaPlayer.setAudioAttributes(
-                    new AudioAttributes.Builder()
-                            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                            .setUsage(AudioAttributes.USAGE_MEDIA)
-                            .build()
-            );
-            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                @Override
-                public void onCompletion(MediaPlayer mp) {
-                    state = State.NON_PLAYING;
-                    if (current_song_index < songs.size() - 1) {
-                        current_song_index += 1;
-                    }
-                    else {
-                        current_song_index = 0;
-                    }
-                    playSong();
-                    Log.d("mediaPlayer", "completed");
-                }
-            });
-            mediaPlayer.reset();
+            setMediaPlayer();
             try {
                 mediaPlayer.setDataSource(getApplicationContext(), contentUri);
             } catch (IOException | IllegalStateException e) {
