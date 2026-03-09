@@ -13,6 +13,8 @@ import java.io.FileDescriptor;
 import java.io.Serializable;
 
 public class Song implements Serializable {
+
+    private final static String ALBUM_ART_URI = "content://media/external/audio/albumart";
     private final long id;
     private final String name;
 
@@ -46,7 +48,7 @@ public class Song implements Serializable {
         try
         {
             final Uri sArtworkUri = Uri
-                    .parse("content://media/external/audio/albumart");
+                    .parse(ALBUM_ART_URI);
 
             Uri uri = ContentUris.withAppendedId(sArtworkUri, album_id);
 
