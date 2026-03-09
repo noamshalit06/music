@@ -13,8 +13,8 @@ import androidx.core.content.ContextCompat;
 import java.util.concurrent.Callable;
 
 public class PermissionsUtil {
-    private static final int READ_MEDIA_AUDIO_PERMISSION = 1;
-    private static final int VIBRATE_PERMISSION = 2;
+    public static final int READ_MEDIA_AUDIO_PERMISSION = 1;
+    public static final int VIBRATE_PERMISSION = 2;
 
     public static void handlePermissionsResult(Activity activity, int requestCode, String[] permissions,
                                            int[] grantResults, Callable<Void> runOnPermissionGranted) {
@@ -29,22 +29,6 @@ public class PermissionsUtil {
         }
     }
 
-
-    private static void showReadingAudioPermissionExplanationDialog(Activity activity) {
-        new AlertDialog.Builder(activity)
-                .setTitle("Permission Required")
-                .setMessage("This app needs audio access")
-                .setPositiveButton("Grant", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        ActivityCompat.requestPermissions(activity,
-                                new String[]{Manifest.permission.READ_MEDIA_AUDIO},
-                                READ_MEDIA_AUDIO_PERMISSION);
-                        dialog.dismiss();
-                    }
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
-    }
     public static void RequestReadingAudioPermissions(Activity activity, Callable<Void> runOnPermissionGranted) {
         if (ContextCompat.checkSelfPermission(
                 activity, Manifest.permission.READ_MEDIA_AUDIO) ==
@@ -60,7 +44,7 @@ public class PermissionsUtil {
         }
         else if (ActivityCompat.shouldShowRequestPermissionRationale(
                 activity, Manifest.permission.READ_MEDIA_AUDIO)) {
-            showReadingAudioPermissionExplanationDialog(activity);
+            DialogsUtil.showReadingAudioPermissionExplanationDialog(activity);
         }
         else {
             ActivityCompat.requestPermissions(activity,
@@ -71,21 +55,7 @@ public class PermissionsUtil {
     }
 
 
-    private static void showVibrationPermissionExplanationDialog(Activity activity) {
-        new AlertDialog.Builder(activity)
-                .setTitle("Permission Required")
-                .setMessage("This app needs vibration permissions")
-                .setPositiveButton("Grant", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        ActivityCompat.requestPermissions(activity,
-                                new String[]{Manifest.permission.VIBRATE},
-                                VIBRATE_PERMISSION);
-                        dialog.dismiss();
-                    }
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
-    }
+
     public static void RequestVibratePermissions(Activity activity, Callable<Void> runOnPermissionGranted) {
         if (ContextCompat.checkSelfPermission(
                 activity, Manifest.permission.VIBRATE) ==
@@ -99,7 +69,7 @@ public class PermissionsUtil {
         }
         else if (ActivityCompat.shouldShowRequestPermissionRationale(
                 activity, Manifest.permission.VIBRATE)) {
-            showVibrationPermissionExplanationDialog(activity);
+            DialogsUtil.showVibrationPermissionExplanationDialog(activity);
         }
         else {
             ActivityCompat.requestPermissions(activity,
