@@ -86,12 +86,8 @@ public class MediaPlayerActivity extends AppCompatActivity {
                         throw new RuntimeException(e);
                     }
                     try {
-                        SharedPreferences sharedPref = activity.getSharedPreferences("media_player_prefs", MODE_PRIVATE);
-                        SharedPreferences.Editor editor = sharedPref.edit();
-                        editor.putLong(getString(R.string.song_index_insert_timestamp), System.currentTimeMillis());
-                        editor.putLong(getString(R.string.song_index_number), mService.getSongIndex());
-                        editor.putLong(getString(R.string.time_in_song), mService.getTimeInPlayingSong());
-                        editor.apply();
+                        SharedPreferencesUtil.editSharedPreferences(activity, System.currentTimeMillis(),
+                                mService.getSongIndex(), mService.getTimeInPlayingSong());
                         updateProgressBar(false);
 
 
