@@ -20,13 +20,14 @@ public class Song implements Serializable {
 
     private final long duration;
     private final long albumArt;
+    private boolean isLiked;
 
-
-    public Song(long new_id, String new_name, long duration, long albumId) {
+    public Song(long new_id, String new_name, long duration, long albumId, boolean isLiked) {
         this.id = new_id;
         this.name = new_name;
         this.duration = duration;
         this.albumArt = albumId;
+        this.isLiked = isLiked;
     }
 
     public long getID() {
@@ -39,6 +40,14 @@ public class Song implements Serializable {
 
     public long getDuration() {
         return duration;
+    }
+
+    public boolean IsLiked() {
+        return isLiked;
+    }
+
+    public void flipLike() {
+        this.isLiked = !this.isLiked;
     }
 
 

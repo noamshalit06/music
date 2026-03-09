@@ -115,6 +115,13 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         return songs.get((int)current_song_index);
     }
 
+    public void flipLikeSong() {
+        Song song = getSong();
+        song.flipLike();
+        songs.set((int)current_song_index, song);
+    }
+
+
 
     public long getTimeInPlayingSong() {
         if (state == State.PLAYING) {
@@ -148,11 +155,13 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
 
     public void nextSong() {
         if (state == State.PLAYING) {
+            song_time = 0;
             mediaPlayer.pause();
         }
         state = State.NON_PLAYING;
         if (current_song_index < songs.size() - 1) {
             current_song_index += 1;
+            Log.d("next_song", Long.toString(current_song_index));
         }
         else {
             current_song_index = 0;
@@ -162,11 +171,14 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
 
     public void prevSong() {
         if (state == State.PLAYING) {
+            song_time = 0;
             mediaPlayer.pause();
         }
         state = State.NON_PLAYING;
         if (current_song_index > 0) {
             current_song_index -= 1;
+            Log.d("prev_song", Long.toString(current_song_index));
+
         }
         else {
             current_song_index = songs.size() - 1;

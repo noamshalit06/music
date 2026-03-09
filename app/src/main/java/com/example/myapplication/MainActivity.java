@@ -26,9 +26,11 @@ import androidx.core.view.WindowInsetsCompat;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 
+import java.io.File;
 import java.io.FileDescriptor;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 
 public class MainActivity extends AppCompatActivity
@@ -113,6 +115,7 @@ public class MainActivity extends AppCompatActivity
                 new String[]{"%Music%"},
                 MediaStore.Audio.Media.DISPLAY_NAME + " ASC");
 
+        ArrayList<String> likedSongs = LikedSongsUtil.getLikedSongs(this);
 
         if (audioCursor != null && audioCursor.moveToFirst()) {
             int idColumn = audioCursor.getColumnIndex(MediaStore.Audio.Media._ID);
@@ -126,10 +129,8 @@ public class MainActivity extends AppCompatActivity
                 String displayName = audioCursor.getString(displayNameColumn);
                 long albumId = audioCursor.getLong(albumIdColumn);
                 long duration = audioCursor.getLong(durationColumn);
-                
-                songs.add(new Song(id, displayName, duration, albumId));
-
-
+                boolean isLiked = likedSongs.contains(displayName);
+                songs.add(new Song(id, displayName, duration, albumId, isLiked));
             } while (audioCursor.moveToNext());
         }
         return songs;
@@ -156,7 +157,6 @@ public class MainActivity extends AppCompatActivity
             Intent intent = new Intent(MainActivity.this, MediaPlayerActivity.class);
             intent.putExtra(EXTRA_MESSAGE_SONGS_LIST, (Serializable) songs);
             intent.putExtra(EXTRA_MESSAGE_SONG_INDEX, (long)v.getId());
-
             startActivity(intent);
         }
     }

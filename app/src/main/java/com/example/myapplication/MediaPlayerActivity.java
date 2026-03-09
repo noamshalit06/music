@@ -1,7 +1,7 @@
 package com.example.myapplication;
 
 import static java.lang.Thread.sleep;
-
+import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -14,6 +14,7 @@ import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
@@ -84,11 +85,22 @@ public class MediaPlayerActivity extends AppCompatActivity {
 
                     ImageView myImageView = (ImageView) findViewById(R.id.albumArt);
                     Bitmap bm = mService.getSong().getAlbumPicture(context);
+
+                    Button likeButton = (Button)findViewById(R.id.likeButton);
+
+                    final String buttonText;
+                    if (mService.getSong().IsLiked()) {
+                        buttonText = "unlike";
+                    }
+                    else {
+                        buttonText = "like";
+                    }
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             if (bm != null) {
                                 myImageView.setImageBitmap(bm);
+                                likeButton.setText(buttonText);
                             }
                         }
                     });
@@ -175,8 +187,18 @@ public class MediaPlayerActivity extends AppCompatActivity {
         }
     }
 
+    @SuppressLint("SetTextI18n")
     public void onButtonLikeClick(View v) {
         if (mBound) {
+            Button likeButton = (Button)findViewById(R.id.likeButton);
+            if (mService.getSong().IsLiked()) {
+                LikedSongsUtil.removeLikedSong(this, mService.getSong().getName());
+                mService.flipLikeSong();
+            }
+            else {
+                LikedSongsUtil.AddLikedSong(this, mService.getSong().getName());
+                mService.flipLikeSong();
+            }
             Log.d("encryption", JniCallNative.Encrypt("abc"));
             Log.d("decryption", JniCallNative.Decrypt(JniCallNative.Encrypt("abc")));
         }
