@@ -70,16 +70,18 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
-                Log.d("mediaPlayer", "song" + Long.toString(current_song_index) + " completed");
+                if (state == State.PLAYING) {
+                    Log.d("mediaPlayer", "song" + Long.toString(current_song_index) + " completed");
 
-                state = State.NON_PLAYING;
-                if (current_song_index < songs.size() - 1) {
-                    current_song_index += 1;
+                    state = State.NON_PLAYING;
+                    if (current_song_index < songs.size() - 1) {
+                        current_song_index += 1;
+                    }
+                    else {
+                        current_song_index = 0;
+                    }
+                    playSong();
                 }
-                else {
-                    current_song_index = 0;
-                }
-                playSong();
             }
         });
         mediaPlayer.reset();
@@ -154,8 +156,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     }
 
     public void nextSong() {
+        song_time = 0;
         if (state == State.PLAYING) {
-            song_time = 0;
             mediaPlayer.pause();
         }
         state = State.NON_PLAYING;
@@ -170,8 +172,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     }
 
     public void prevSong() {
+        song_time = 0;
         if (state == State.PLAYING) {
-            song_time = 0;
             mediaPlayer.pause();
         }
         state = State.NON_PLAYING;
