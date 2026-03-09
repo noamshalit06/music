@@ -47,17 +47,10 @@ public class MainActivity extends AppCompatActivity
         songs = makeListsOfSongs();
         createSongsButtons(songs);
 
-        SharedPreferences sharedPref = this.getSharedPreferences("media_player_prefs", MODE_PRIVATE);
 
-        long song_index_insert_timestamp_default_value = getResources().getInteger(R.integer.song_index_insert_timestamp_default_value);
-        long song_index_insert_timestamp = sharedPref.getLong(getString(R.string.song_index_insert_timestamp), song_index_insert_timestamp_default_value);
-
-
-        long song_index_number_default_value = getResources().getInteger(R.integer.song_index_number_default_value);
-        long song_index_number = sharedPref.getLong(getString(R.string.song_index_number), song_index_number_default_value);
-
-        long time_in_song_default_value = getResources().getInteger(R.integer.time_in_song_default_value);
-        long time_in_song = sharedPref.getLong(getString(R.string.time_in_song), time_in_song_default_value);
+        long song_index_insert_timestamp = SharedPreferencesUtil.getSongIndexTimeStamp(this);
+        long song_index_number = SharedPreferencesUtil.getSongIndexNumber(this);
+        long time_in_song = SharedPreferencesUtil.getTimeInSong(this);
 
         if (song_index_insert_timestamp != 0 && time_in_song > 0 && song_index_number >= 0 && song_index_insert_timestamp + 500 < System.currentTimeMillis() ) {
             Intent intent = new Intent(MainActivity.this, MediaPlayerActivity.class);
@@ -110,7 +103,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    
+
     private ArrayList<Song> makeListsOfSongs() {
         ArrayList<Song> songs = new ArrayList<Song>();
 
