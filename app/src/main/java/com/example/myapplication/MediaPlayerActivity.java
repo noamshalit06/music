@@ -87,14 +87,14 @@ public class MediaPlayerActivity extends AppCompatActivity {
                     ImageView myImageView = (ImageView)findViewById(R.id.albumArt);
                     ImageButton likeButton = (ImageButton)findViewById(R.id.likeButton);
 
-                    Bitmap bm = mService.getSong().getAlbumPicture(activity);
+                    Bitmap bm = mService.getSong().getAlbumPicture(context);
 
                     final int heartId;
                     if (mService.getSong().IsLiked()) {
-                        heartId = R.drawable.empty_heart;
+                        heartId = R.drawable.full_heart;
                     }
                     else {
-                        heartId = R.drawable.full_heart;
+                        heartId = R.drawable.empty_heart;
                     }
 
                     runOnUiThread(new Runnable() {
