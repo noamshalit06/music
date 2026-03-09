@@ -15,6 +15,7 @@ import android.os.Vibrator;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
@@ -83,28 +84,33 @@ public class MediaPlayerActivity extends AppCompatActivity {
                     updateProgressBar(false);
 
 
-                    ImageView myImageView = (ImageView) findViewById(R.id.albumArt);
-                    Bitmap bm = mService.getSong().getAlbumPicture(context);
+                    ImageView myImageView = (ImageView)findViewById(R.id.albumArt);
+                    ImageButton likeButton = (ImageButton)findViewById(R.id.likeButton);
 
-                    Button likeButton = (Button)findViewById(R.id.likeButton);
+                    Bitmap bm = mService.getSong().getAlbumPicture(activity);
 
-                    final String buttonText;
+                    final int heartId;
                     if (mService.getSong().IsLiked()) {
-                        buttonText = "unlike";
+                        heartId = R.drawable.empty_heart;
                     }
                     else {
-                        buttonText = "like";
+                        heartId = R.drawable.full_heart;
                     }
+
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             if (bm != null) {
                                 myImageView.setImageBitmap(bm);
-                                likeButton.setText(buttonText);
                             }
+                            else {
+                                myImageView.setImageResource(R.drawable.artist);
+                            }
+                            likeButton.setImageResource(heartId);
                         }
                     });
-                } catch (NullPointerException | IllegalStateException e) {
+                }
+                catch (NullPointerException | IllegalStateException e) {
                     break;
                 }
             }
@@ -189,7 +195,7 @@ public class MediaPlayerActivity extends AppCompatActivity {
     @SuppressLint("SetTextI18n")
     public void onButtonLikeClick(View v) {
         if (mBound) {
-            Button likeButton = (Button)findViewById(R.id.likeButton);
+            ImageButton likeButton = (ImageButton)findViewById(R.id.likeButton);
             if (mService.getSong().IsLiked()) {
                 LikedSongsUtil.removeLikedSong(this, mService.getSong().getName());
                 mService.flipLikeSong();
