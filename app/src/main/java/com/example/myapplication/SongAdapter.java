@@ -78,7 +78,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
         viewHolder.getAlbumArt().setImageBitmap(songs.get(position).getAlbumPicture(viewHolder.itemView.getContext()));
         viewHolder.getSongName().setText(songs.get(position).getName());
         if (songs.get(position).IsLiked()) {
-            viewHolder.getHeart().setImageResource(R.drawable.full_heart);
+            viewHolder.getHeart().setImageResource(R.drawable.red_heart);
         }
         viewHolder.itemView.setOnClickListener(v -> {
             Log.d("button click", Integer.toString(position));
