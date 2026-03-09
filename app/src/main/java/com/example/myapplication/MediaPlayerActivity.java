@@ -1,5 +1,7 @@
 package com.example.myapplication;
 
+import static java.lang.Thread.sleep;
+
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -59,6 +61,43 @@ public class MediaPlayerActivity extends AppCompatActivity {
         }
     }
 
+
+    private class UpdateThread implements Runnable {
+
+        private Context context;
+        public UpdateThread(Context context) {
+            this.context = context;
+        }
+        @Override
+        public void run() {
+            while (true) {
+                try {
+                    sleep(100);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                try {
+                    SharedPreferencesUtil.editSharedPreferences(context, System.currentTimeMillis(),
+                            mService.getSongIndex(), mService.getTimeInPlayingSong());
+                    updateProgressBar(false);
+
+
+                    ImageView myImageView = (ImageView) findViewById(R.id.albumArt);
+                    Bitmap bm = mService.getSong().getAlbumPicture(context);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (bm != null) {
+                                myImageView.setImageBitmap(bm);
+                            }
+                        }
+                    });
+                } catch (NullPointerException | IllegalStateException e) {
+                    break;
+                }
+            }
+        }
+    }
     @Override
     protected void onStart() {
         super.onStart();
@@ -75,56 +114,16 @@ public class MediaPlayerActivity extends AppCompatActivity {
 
         bindService(send_intent, connection, Context.BIND_AUTO_CREATE);
 
-        MediaPlayerActivity activity = this;
-        Thread thread = new Thread() {
-            @Override
-            public void run() {
-                while (true) {
-                    try {
-                        sleep(100);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                    try {
-                        SharedPreferencesUtil.editSharedPreferences(activity, System.currentTimeMillis(),
-                                mService.getSongIndex(), mService.getTimeInPlayingSong());
-                        updateProgressBar(false);
-
-
-                        ImageView myImageView = (ImageView)findViewById(R.id.albumArt);
-                        Bitmap bm = mService.getSong().getAlbumPicture(activity);
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (bm != null) {
-                                    myImageView.setImageBitmap(bm);
-                                }
-                            }
-                        });
-                    }
-                    catch (NullPointerException | IllegalStateException e) {
-                        break;
-                    }
-                }
-            }
-        };
+        Context activity = this;
+        Thread thread = new Thread(new UpdateThread(activity));
         thread.start();
     }
 
 
-    private Void vibrate() {
-        final Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-
-        final VibrationEffect vibrationEffect1 = VibrationEffect.createOneShot(1000, VibrationEffect.DEFAULT_AMPLITUDE);
-
-        // it is safe to cancel other vibrations currently taking place
-        vibrator.cancel();
-        vibrator.vibrate(vibrationEffect1);
-        return null;
-    }
     public void onButtonPlayClick(View v) {
         if (mBound) {
-            PermissionsUtil.RequestVibratePermissions(this, this::vibrate);
+            VibrationUtil vibrationUtil = new VibrationUtil(this);
+            PermissionsUtil.RequestVibratePermissions(this, vibrationUtil::vibrate);
             mService.playSong();
         }
     }
