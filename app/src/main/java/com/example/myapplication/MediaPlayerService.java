@@ -24,7 +24,14 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
 
     private long song_time;
 
-    private static String state = "Non-playing";
+    enum State {
+        NON_PLAYING,
+        PLAYING,
+        PAUSED,
+        PREPARING
+    }
+
+    private static State state = State.NON_PLAYING;
     ArrayList<Song> songs = new ArrayList<Song>();
 
     // Binder given to clients.
@@ -52,11 +59,11 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
 
 
     public void playSong() {
-        if (Objects.equals(state, "playing")) {
+        if (state == State.PLAYING) {
             return;
         }
-        else if (Objects.equals(state, "paused")) {
-            state = "playing";
+        else if (state == State.PAUSED) {
+            state = State.PLAYING;
             mediaPlayer.start();
         }
         else
@@ -75,7 +82,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
             mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mp) {
-                    state = "Non-playing";
+                    state = State.NON_PLAYING;
                     if (current_song_index < songs.size() - 1) {
                         current_song_index += 1;
                     }
@@ -93,7 +100,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
                 Log.e("mediaPlayer exception setDataSource", e.toString());
                 throw new RuntimeException(e);
             }
-            state = "preparing";
+            state = State.PREPARING;
             mediaPlayer.prepareAsync(); // prepare async to not block main thread
         }
 
@@ -106,7 +113,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
 
 
     public long getTimeInPlayingSong() {
-        if (state.equals("playing")) {
+        if (state == State.PLAYING) {
             return mediaPlayer.getCurrentPosition();
         }
         return -1;
@@ -120,26 +127,26 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         return mediaPlayer.getCurrentPosition();
     }
     public long getSongIndex() {
-        if (state.equals("playing")) {
+        if (state == State.PLAYING) {
             return current_song_index;
         }
         return -1;
     }
     public int pauseSong() {
-        if (state.equals("playing")) {
+        if (state == State.PLAYING) {
             int time = mediaPlayer.getCurrentPosition();
             mediaPlayer.pause();
-            state = "paused";
+            state = State.PAUSED;
             return time;
         }
         return 0;
     }
 
     public void nextSong() {
-        if (state.equals("playing")) {
+        if (state == State.PLAYING) {
             mediaPlayer.pause();
         }
-        state = "Non-playing";
+        state = State.NON_PLAYING;
         if (current_song_index < songs.size() - 1) {
             current_song_index += 1;
         }
@@ -150,10 +157,10 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     }
 
     public void prevSong() {
-        if (state.equals("playing")) {
+        if (state == State.PLAYING) {
             mediaPlayer.pause();
         }
-        state = "Non-playing";
+        state = State.NON_PLAYING;
         if (current_song_index > 0) {
             current_song_index -= 1;
         }
@@ -169,7 +176,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
             mediaPlayer.seekTo((int)song_time);
             song_time = 0;
         }
-        state = "playing";
+        state = State.PLAYING;
         mediaPlayer.start();
     }
 
@@ -185,6 +192,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         super.onDestroy();
         mediaPlayer.release();
         mediaPlayer = null;
-        state = "Non-playing";
+        state = State.NON_PLAYING;
     }
 }
