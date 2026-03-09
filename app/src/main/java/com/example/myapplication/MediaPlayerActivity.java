@@ -126,11 +126,17 @@ public class MediaPlayerActivity extends AppCompatActivity {
             PermissionsUtil.RequestVibratePermissions(this, vibrationUtil::vibrate);
             mService.playSong();
         }
+        else {
+            Log.d("mBoundError", "onButtonPlayClick");
+        }
     }
 
     public void onButtonPauseClick(View v) {
         if (mBound) {
             updateProgressBar(true);
+        }
+        else {
+            Log.d("mBoundError", "onButtonPauseClick");
         }
     }
 
@@ -153,6 +159,9 @@ public class MediaPlayerActivity extends AppCompatActivity {
             ProgressBar songProgressBar = (ProgressBar) findViewById(R.id.songProgressBar);
             songProgressBar.setProgress(0);
         }
+        else {
+            Log.d("mBoundError", "onButtonNextClick");
+        }
     }
 
     public void onButtonPrevClick(View v) {
@@ -160,6 +169,9 @@ public class MediaPlayerActivity extends AppCompatActivity {
             ProgressBar songProgressBar = (ProgressBar) findViewById(R.id.songProgressBar);
             songProgressBar.setProgress(0);
             mService.prevSong();
+        }
+        else {
+            Log.d("mBoundError", "onButtonPrevClick");
         }
     }
 
