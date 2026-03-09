@@ -22,6 +22,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
@@ -46,7 +48,7 @@ public class MainActivity extends AppCompatActivity
 
 
     public Void readPermissionsGrantedOnCreate() {
-        removeButtons();
+//        removeButtons();
         songs = makeListsOfSongs();
         createSongsButtons(songs);
 
@@ -67,7 +69,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     public Void readPermissionsGranted() {
-        removeButtons();
+//        removeButtons();
         songs = makeListsOfSongs();
         createSongsButtons(songs);
         return null;
@@ -138,22 +140,27 @@ public class MainActivity extends AppCompatActivity
         return songs;
     }
 
+
+
     private void createSongsButtons(ArrayList<Song> songs)
     {
-        LinearLayout ll = (LinearLayout)findViewById(R.id.linearLayout);
-        for (int i = 0; i < songs.size(); i++) {
-            Song currentSong = songs.get(i);
-            Button b = new Button(this);
-            String text = currentSong.getName();
-            if (currentSong.IsLiked()) {
-                text += " $$$";
-            }
-            b.setText(text);
-            b.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
-            b.setId(i);
-            b.setOnClickListener(new onClickListener());
-            ll.addView(b);
-        }
+        RecyclerView recyclerView = findViewById(R.id.recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(new SongAdapter(songs));
+//        LinearLayout ll = (LinearLayout)findViewById(R.id.linearLayout);
+//        for (int i = 0; i < songs.size(); i++) {
+//            Song currentSong = songs.get(i);
+//            Button b = new Button(this);
+//            String text = currentSong.getName();
+//            if (currentSong.IsLiked()) {
+//                text += " $$$";
+//            }
+//            b.setText(text);
+//            b.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+//            b.setId(i);
+//            b.setOnClickListener(new onClickListener());
+//            ll.addView(b);
+//        }
     }
 
     private void removeButtons() {
