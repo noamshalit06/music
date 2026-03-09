@@ -60,7 +60,11 @@ public class Song implements Serializable {
                 FileDescriptor fd = pfd.getFileDescriptor();
                 bm = BitmapFactory.decodeFileDescriptor(fd);
             }
+            else {
+                Log.e("GetAlbumArtError", "album art doesn't exist");
+            }
         } catch (Exception e) {
+            Log.e("GetAlbumArtError", e.toString());
         }
         return bm;
     }
