@@ -125,7 +125,6 @@ public class MediaPlayerActivity extends AppCompatActivity {
         send_intent.putExtra(EXTRA_MESSAGE_SONG_TIME, song_time);
 
         bindService(send_intent, connection, Context.BIND_AUTO_CREATE);
-
         Context activity = this;
         Thread thread = new Thread(new UpdateThread(activity));
         thread.start();
