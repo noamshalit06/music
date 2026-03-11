@@ -44,7 +44,11 @@ public class MainActivity extends AppCompatActivity
 
     public static String EXTRA_MESSAGE_SONG_TIME = "song_time";
 
-    public static String state;
+    enum State {
+        CREATE,
+        RESUME
+    }
+    private static State state;
 
 
     public Void readPermissionsGrantedOnCreate() {
@@ -78,7 +82,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        state = "create";
+        state = State.CREATE;
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
@@ -92,7 +96,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onResume() {
-        state = "resume";
+        state = State.RESUME;
         super.onResume();
         PermissionsUtil.RequestReadingAudioPermissions(this, this::readPermissionsGranted);
     }
@@ -101,10 +105,10 @@ public class MainActivity extends AppCompatActivity
     public void onRequestPermissionsResult(int requestCode, String[] permissions,
                                            int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (state.equals("create")) {
+        if (state == State.CREATE) {
             PermissionsUtil.handlePermissionsResult(this, requestCode, permissions, grantResults, this::readPermissionsGrantedOnCreate);
         }
-        else if (state.equals("resume")) {
+        else if (state == State.RESUME) {
             PermissionsUtil.handlePermissionsResult(this, requestCode, permissions, grantResults, this::readPermissionsGranted);
         }
     }
