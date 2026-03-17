@@ -52,7 +52,7 @@ public class MediaPlayerActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-        }
+    }
 
 
     private void showArt() {
@@ -64,9 +64,34 @@ public class MediaPlayerActivity extends AppCompatActivity {
     }
 
 
+
+    private class UpdateUIThread implements Runnable {
+
+        ImageView myImageView;
+        Bitmap bm;
+        ImageButton likeButton;
+        int heartId;
+
+        public UpdateUIThread(ImageView myImageView, Bitmap bm, ImageButton likeButton, int heartId) {
+            this.myImageView = myImageView;
+            this.bm = bm;
+            this.likeButton = likeButton;
+            this.heartId = heartId;
+        }
+
+        @Override
+        public void run() {
+            if (bm != null) {
+                myImageView.setImageBitmap(bm);
+            } else {
+                myImageView.setImageResource(R.drawable.artist);
+            }
+            likeButton.setImageResource(heartId);
+        }
+    }
     private class UpdateThread implements Runnable {
 
-        private Context context;
+        private final Context context;
         public UpdateThread(Context context) {
             this.context = context;
         }
@@ -96,19 +121,8 @@ public class MediaPlayerActivity extends AppCompatActivity {
                     else {
                         heartId = R.drawable.empty_heart;
                     }
-
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (bm != null) {
-                                myImageView.setImageBitmap(bm);
-                            }
-                            else {
-                                myImageView.setImageResource(R.drawable.artist);
-                            }
-                            likeButton.setImageResource(heartId);
-                        }
-                    });
+                    Thread thread = new Thread(new UpdateUIThread(myImageView, bm, likeButton, heartId));
+                    runOnUiThread(thread);
                 }
                 catch (NullPointerException | IllegalStateException e) {
                     break;

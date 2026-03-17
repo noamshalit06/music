@@ -51,17 +51,18 @@ public class MainActivity extends AppCompatActivity
     private static State state;
 
 
-    public Void readPermissionsGrantedOnCreate() {
-//        removeButtons();
-        songs = makeListsOfSongs();
-        createSongsButtons(songs);
-
-
+    private void startMediaPlayerIfShould() {
         long song_index_insert_timestamp = SharedPreferencesUtil.getSongIndexTimeStamp(this);
         long song_index_number = SharedPreferencesUtil.getSongIndexNumber(this);
         long time_in_song = SharedPreferencesUtil.getTimeInSong(this);
 
-        if (song_index_insert_timestamp != 0 && time_in_song > 0 && song_index_number >= 0 && song_index_insert_timestamp + 500 < System.currentTimeMillis() ) {
+        boolean shouldStartMediaPlayer = (song_index_insert_timestamp != 0) && (time_in_song > 0) && (song_index_number >= 0);
+        // I should Start media Player if the following conditions apply:
+        // time_in_song > 0 (makes sense, only if we were listening to a song)
+        // song_index_number >=0 (real song index)
+        // song_index_insert_timestamp != 0 (real timestamp)
+
+        if (shouldStartMediaPlayer) {
             Intent intent = new Intent(MainActivity.this, MediaPlayerActivity.class);
             intent.putExtra(EXTRA_MESSAGE_SONGS_LIST, (Serializable) songs);
             intent.putExtra(EXTRA_MESSAGE_SONG_INDEX, song_index_number);
@@ -69,11 +70,15 @@ public class MainActivity extends AppCompatActivity
 
             startActivity(intent);
         }
+    }
+    public Void readPermissionsGrantedOnCreate() {
+        songs = makeListsOfSongs();
+        createSongsButtons(songs);
+        startMediaPlayerIfShould();
         return null;
     }
 
     public Void readPermissionsGranted() {
-//        removeButtons();
         songs = makeListsOfSongs();
         createSongsButtons(songs);
         return null;
@@ -151,34 +156,6 @@ public class MainActivity extends AppCompatActivity
         RecyclerView recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(new SongAdapter(songs));
-//        LinearLayout ll = (LinearLayout)findViewById(R.id.linearLayout);
-//        for (int i = 0; i < songs.size(); i++) {
-//            Song currentSong = songs.get(i);
-//            Button b = new Button(this);
-//            String text = currentSong.getName();
-//            if (currentSong.IsLiked()) {
-//                text += " $$$";
-//            }
-//            b.setText(text);
-//            b.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
-//            b.setId(i);
-//            b.setOnClickListener(new onClickListener());
-//            ll.addView(b);
-//        }
-    }
-
-    private void removeButtons() {
-        int i = 0;
-        LinearLayout ll = (LinearLayout)findViewById(R.id.linearLayout);
-
-        while (true) {
-            Button b = (Button)findViewById(i);
-            if (b == null) {
-                break;
-            }
-            ll.removeView(b);
-            i += 1;
-        }
     }
 
 

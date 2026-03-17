@@ -23,8 +23,8 @@ public class EncryptedFileUtil {
             return JniCallNative.Decrypt(file_contents);
         } catch (IOException e) {
             Log.e("Error", "ReadDataError");
-            return "";
         }
+        return "";
     }
 
     public static void writeData(Context context, String data, String filename) {
