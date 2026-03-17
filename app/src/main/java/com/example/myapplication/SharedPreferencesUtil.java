@@ -39,10 +39,4 @@ public class SharedPreferencesUtil {
         editor.putLong(context.getString(R.string.time_in_song), time_in_song);
         editor.apply();
     }
-
-
-
-
-
-
 }
