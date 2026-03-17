@@ -8,12 +8,25 @@
     tools:context=".MainActivity"
     android:orientation="vertical">
 
-
-    <ScrollView android:layout_height="match_parent" android:id="@+id/scrollView1"
-        android:layout_width="match_parent">
-        <LinearLayout android:id="@+id/linearLayout" android:layout_width="match_parent"
-            android:orientation="vertical" android:layout_height="match_parent">
-        </LinearLayout>
-    </ScrollView>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text = "LionMelody"
+        android:textSize="30sp"
+        android:gravity="center"
+        android:layout_marginVertical="50dp"
+        ></TextView>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view"
+        android:clipToPadding="false"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="50dp"/>
+<!--    <ScrollView android:layout_height="match_parent" android:id="@+id/scrollView1"-->
+<!--        android:layout_width="match_parent">-->
+<!--        <LinearLayout android:id="@+id/linearLayout" android:layout_width="match_parent"-->
+<!--            android:orientation="vertical" android:layout_height="match_parent">-->
+<!--        </LinearLayout>-->
+<!--    </ScrollView>-->
 
 </androidx.constraintlayout.widget.ConstraintLayout>

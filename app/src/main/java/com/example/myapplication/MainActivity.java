@@ -1,38 +1,38 @@
 package com.example.myapplication;
 import com.example.myapplication.data_classes.Song;
-import com.example.myapplication.MyMediaPlayer;
 
-import android.Manifest;
-import android.app.Activity;
 import android.content.ContentUris;
-import android.content.DialogInterface;
+import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
+import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
+import android.os.ParcelFileDescriptor;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
 import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Scanner;
 
 
 public class MainActivity extends AppCompatActivity
@@ -42,6 +42,41 @@ public class MainActivity extends AppCompatActivity
 
     public static String EXTRA_MESSAGE_SONG_INDEX = "song_index";
 
+    public static String EXTRA_MESSAGE_SONG_TIME = "song_time";
+
+    enum State {
+        CREATE,
+        RESUME
+    }
+    private static State state;
+
+
+    private void startMediaPlayerIfShould() {
+        long song_index_insert_timestamp = SharedPreferencesUtil.getSongIndexTimeStamp(this);
+        long song_index_number = SharedPreferencesUtil.getSongIndexNumber(this);
+        long time_in_song = SharedPreferencesUtil.getTimeInSong(this);
+
+        boolean shouldStartMediaPlayer = (song_index_insert_timestamp != 0) && (time_in_song > 0) && (song_index_number >= 0);
+        // I should Start media Player if the following conditions apply:
+        // time_in_song > 0 (makes sense, only if we were listening to a song)
+        // song_index_number >=0 (real song index)
+        // song_index_insert_timestamp != 0 (real timestamp)
+
+        if (shouldStartMediaPlayer) {
+            Intent intent = new Intent(MainActivity.this, MediaPlayerActivity.class);
+            intent.putExtra(EXTRA_MESSAGE_SONGS_LIST, (Serializable) songs);
+            intent.putExtra(EXTRA_MESSAGE_SONG_INDEX, song_index_number);
+            intent.putExtra(EXTRA_MESSAGE_SONG_TIME, time_in_song);
+
+            startActivity(intent);
+        }
+    }
+    public Void readPermissionsGrantedOnCreate() {
+        songs = makeListsOfSongs();
+        createSongsButtons(songs);
+        startMediaPlayerIfShould();
+        return null;
+    }
 
     public Void readPermissionsGranted() {
         songs = makeListsOfSongs();
@@ -52,6 +87,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        state = State.CREATE;
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
@@ -60,11 +96,12 @@ public class MainActivity extends AppCompatActivity
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-        PermissionsUtil.RequestReadingAudioPermissions(this, this::readPermissionsGranted);
+        PermissionsUtil.RequestReadingAudioPermissions(this, this::readPermissionsGrantedOnCreate);
     }
 
     @Override
     protected void onResume() {
+        state = State.RESUME;
         super.onResume();
         PermissionsUtil.RequestReadingAudioPermissions(this, this::readPermissionsGranted);
     }
@@ -73,9 +110,13 @@ public class MainActivity extends AppCompatActivity
     public void onRequestPermissionsResult(int requestCode, String[] permissions,
                                            int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        PermissionsUtil.handlePermissionsResult(this, requestCode, permissions, grantResults, this::readPermissionsGranted);
+        if (state == State.CREATE) {
+            PermissionsUtil.handlePermissionsResult(this, requestCode, permissions, grantResults, this::readPermissionsGrantedOnCreate);
+        }
+        else if (state == State.RESUME) {
+            PermissionsUtil.handlePermissionsResult(this, requestCode, permissions, grantResults, this::readPermissionsGranted);
+        }
     }
-
 
 
     private ArrayList<Song> makeListsOfSongs() {
@@ -87,71 +128,43 @@ public class MainActivity extends AppCompatActivity
                 new String[]{"%Music%"},
                 MediaStore.Audio.Media.DISPLAY_NAME + " ASC");
 
+        ArrayList<String> likedSongs = LikedSongsUtil.getLikedSongs(this);
 
         if (audioCursor != null && audioCursor.moveToFirst()) {
             int idColumn = audioCursor.getColumnIndex(MediaStore.Audio.Media._ID);
             int displayNameColumn = audioCursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME);
             int albumIdColumn = audioCursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID);
+            int durationColumn = audioCursor.getColumnIndex(MediaStore.Audio.Media.DURATION);
+
 
             do {
                 long id = audioCursor.getLong(idColumn);
                 String displayName = audioCursor.getString(displayNameColumn);
                 long albumId = audioCursor.getLong(albumIdColumn);
-
-
-
-                Log.d(displayName, Long.toString(id));
-
-                Cursor albumCursor = getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
-                        new String[] {MediaStore.Audio.Albums._ID, MediaStore.Audio.Albums.ALBUM_ART},
-                        MediaStore.Audio.Albums._ID+ "=" + albumId,
-                        null,
-                        null);
-                if (albumCursor.moveToFirst()) {
-                    int albumArtID = albumCursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM_ART);
-                    String albumArtPath = albumCursor.getString(albumArtID);
-                    if (albumArtPath == null) {
-                        songs.add(new Song(id, displayName));
-
-                    }
-                    else {
-                        songs.add(new Song(id, displayName, albumArtPath));
-                        Log.d("albumPath", albumArtPath);
-                    }
-                }
-                else
-                {
-                    songs.add(new Song(id, displayName));
-//                    Log.d("albumPath", "error");
-                }
-
+                long duration = audioCursor.getLong(durationColumn);
+                boolean isLiked = likedSongs.contains(displayName);
+                songs.add(new Song(id, displayName, duration, albumId, isLiked));
             } while (audioCursor.moveToNext());
         }
         return songs;
     }
 
+
+
     private void createSongsButtons(ArrayList<Song> songs)
     {
-        LinearLayout ll = (LinearLayout)findViewById(R.id.linearLayout);
-        for (int i = 0; i < songs.size(); i++) {
-            Song currentSong = songs.get(i);
-            Button b = new Button(this);
-            b.setText(currentSong.getName());
-            b.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
-            b.setId(i);
-            b.setOnClickListener(new onClickListener());
-            ll.addView(b);
-        }
+        RecyclerView recyclerView = findViewById(R.id.recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(new SongAdapter(songs));
     }
 
 
     private class onClickListener implements View.OnClickListener {
         public void onClick(View v) {
             Log.d("button click", Long.toString(v.getId()));
-            Intent intent = new Intent(MainActivity.this, MyMediaPlayer.class);
+            Intent intent = new Intent(MainActivity.this, MediaPlayerActivity.class);
             intent.putExtra(EXTRA_MESSAGE_SONGS_LIST, (Serializable) songs);
-            intent.putExtra(EXTRA_MESSAGE_SONG_INDEX, v.getId());
-
+            intent.putExtra(EXTRA_MESSAGE_SONG_INDEX, (long)v.getId());
             startActivity(intent);
         }
     }

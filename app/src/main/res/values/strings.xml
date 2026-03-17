@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">My Application</string>
     <string name="title_activity_main3">MainActivity3</string>
+    <string name="song_index_number">COM.EXAMPLE.MYAPPLICATION.SONG_INDEX_NUMBER</string>
+    <string name="song_index_insert_timestamp">COM.EXAMPLE.MYAPPLICATION.SONG_INDEX_INSERT_TIMESTAMP</string>
+    <string name="time_in_song">COM.EXAMPLE.MYAPPLICATION.TIME_IN_SONG</string>
 </resources>

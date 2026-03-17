@@ -5,16 +5,85 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MyMediaPlayer">
-    <TextView
-        android:id="@+id/text_view_id"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:text="hello" />
-    <Button
-        android:id="@+id/supabutton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="I'm a button"
-        android:onClick="onButtonPlayClick"/>
+    tools:context=".MediaPlayerActivity">
+    <LinearLayout android:id="@+id/linearLayout" android:layout_width="match_parent"
+        android:orientation="vertical" android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/albumArt"
+            android:layout_width="300px"
+            android:layout_height="300px"
+            android:src="@drawable/artist"
+            android:layout_marginTop="30dp"
+            android:layout_marginRight="125dp" />
+        <ProgressBar
+            android:id="@+id/songProgressBar"
+            android:layout_width="fill_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="30dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginLeft="10dp"
+            android:max="1000"
+            android:progress="0"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"/>
+
+
+
+        <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_marginRight="250px"
+            android:orientation="horizontal">
+            <ImageButton
+                android:id="@+id/nextButton"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:onClick="onButtonNextClick"
+                android:src="@drawable/next"
+                android:background="?attr/selectableItemBackgroundBorderless"/>
+            <ImageButton
+                android:id="@+id/playButton"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:onClick="onButtonPlayClick"
+                android:src="@drawable/play"
+                android:background="?attr/selectableItemBackgroundBorderless"/>
+
+            <ImageButton
+                android:id="@+id/pauseButton"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:onClick="onButtonPauseClick"
+                android:src="@drawable/pause"
+                android:background="?attr/selectableItemBackgroundBorderless"/>
+
+
+            <ImageButton
+                android:id="@+id/prevButton"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:onClick="onButtonPrevClick"
+                android:src="@drawable/prev"
+                android:background="?attr/selectableItemBackgroundBorderless"/>
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/LinearLayout1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical" >
+
+            <ImageButton
+                android:id="@+id/likeButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Like"
+                android:onClick="onButtonLikeClick"
+                android:src="@drawable/empty_heart"
+                android:background="?attr/selectableItemBackgroundBorderless"/>
+        </LinearLayout>
+    </LinearLayout>
+
+
+
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>
