@@ -158,7 +158,7 @@ public class MediaPlayerActivity extends AppCompatActivity {
             mService.playSong();
         }
         else {
-            Log.d("mBoundError", "onButtonPlayClick");
+            Log.d("MediaPlayerActivity", "onButtonPlayClick: mBoundError");
         }
     }
 
@@ -167,7 +167,7 @@ public class MediaPlayerActivity extends AppCompatActivity {
             updateProgressBar(true);
         }
         else {
-            Log.d("mBoundError", "onButtonPauseClick");
+            Log.d("MediaPlayerActivity", "onButtonPauseClick: mBoundError");
         }
     }
 
@@ -191,7 +191,7 @@ public class MediaPlayerActivity extends AppCompatActivity {
             songProgressBar.setProgress(0);
         }
         else {
-            Log.d("mBoundError", "onButtonNextClick");
+            Log.d("MediaPlayerActivity", "onButtonNextClick: mBoundError");
         }
     }
 
@@ -202,7 +202,7 @@ public class MediaPlayerActivity extends AppCompatActivity {
             mService.prevSong();
         }
         else {
-            Log.d("mBoundError", "onButtonPrevClick");
+            Log.d("MediaPlayerActivity", "onButtonPrevClick: mBoundError");
         }
     }
 
@@ -218,8 +218,9 @@ public class MediaPlayerActivity extends AppCompatActivity {
                 LikedSongsUtil.AddLikedSong(this, mService.getSong().getName());
                 mService.flipLikeSong();
             }
-            Log.d("encryption", JniCallNative.Encrypt("abc"));
-            Log.d("decryption", JniCallNative.Decrypt(JniCallNative.Encrypt("abc")));
+        }
+        else {
+            Log.d("MediaPlayerActivity", "onButtonLikeClick: mBoundError");
         }
     }
 
